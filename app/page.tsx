@@ -122,7 +122,19 @@ export default function Home() {
             Plan your festival day with friends
           </p>
           
-          <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
+          <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
+            <Link
+              href="/admin"
+              className="p-6 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 hover:border-rose-500 dark:hover:border-rose-400 transition-colors"
+            >
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-2">
+                Admin
+              </h3>
+              <p className="text-slate-600 dark:text-slate-400 text-sm">
+                Create and manage festivals
+              </p>
+            </Link>
+            
             <Link
               href="/festivals"
               className="p-6 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 hover:border-rose-500 dark:hover:border-rose-400 transition-colors"

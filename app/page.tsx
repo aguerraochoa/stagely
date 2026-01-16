@@ -28,7 +28,7 @@ export default function Home() {
           data: { user },
           error,
         } = await supabase.auth.getUser()
-        
+
         if (error) {
           console.error('Error getting user:', error)
           setLoading(false)
@@ -43,7 +43,7 @@ export default function Home() {
         }
 
         setUser(user)
-        
+
         // Fetch user profile
         try {
           const { data: profileData, error: profileError } = await supabase
@@ -51,14 +51,14 @@ export default function Home() {
             .select('*')
             .eq('id', user.id)
             .single()
-          
+
           if (!profileError && profileData) {
             setProfile(profileData)
           }
         } catch (err) {
           console.error('Error fetching profile:', err)
         }
-        
+
         setLoading(false)
       } catch (error) {
         console.error('Error getting user:', error)
@@ -89,22 +89,22 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
-      <nav className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
+    <div className="min-h-screen bg-retro-cream text-retro-dark">
+      <nav className="bg-white border-b-2 border-retro-dark">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-rose-600 to-rose-800 dark:from-rose-400 dark:to-rose-600 bg-clip-text text-transparent">
+              <h1 className="text-2xl font-black uppercase italic tracking-tighter text-retro-dark">
                 Stagely
               </h1>
             </div>
             <div className="flex items-center gap-4">
-              <span className="text-slate-600 dark:text-slate-400">
+              <span className="text-retro-dark font-bold">
                 {profile?.display_name || profile?.username || user.email}
               </span>
               <button
                 onClick={handleLogout}
-                className="px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100"
+                className="px-4 py-2 text-sm font-black uppercase tracking-wider text-retro-dark hover:text-retro-orange transition-colors"
               >
                 Logout
               </button>
@@ -115,47 +115,52 @@ export default function Home() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="text-center space-y-4">
-          <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-100">
-            Welcome to Stagely!
+          <h2 className="text-5xl font-black text-retro-dark uppercase italic tracking-tighter mb-2">
+            Welcome to Stagely
           </h2>
-          <p className="text-slate-600 dark:text-slate-400">
-            Plan your festival day with friends
+          <p className="text-retro-dark font-bold text-lg opacity-70">
+            Plan your festival day with friends. No more "Where are you?" texts.
           </p>
-          
-          <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
+
+          <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
             <Link
               href="/admin"
-              className="p-6 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 hover:border-rose-500 dark:hover:border-rose-400 transition-colors"
+              className="group p-8 bg-white border-2 border-retro-dark shadow-[4px_4px_0px_0px_rgba(26,44,50,1)] rounded-xl hover:-translate-y-1 hover:shadow-[8px_8px_0px_0px_rgba(26,44,50,1)] transition-all text-left"
             >
-              <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-2">
+              <h3 className="text-xl font-black text-retro-dark mb-2 uppercase italic">
                 Admin
               </h3>
-              <p className="text-slate-600 dark:text-slate-400 text-sm">
-                Create and manage festivals
+              <p className="text-retro-dark/70 font-medium text-sm group-hover:text-retro-dark transition-colors">
+                Create and manage festivals.
               </p>
             </Link>
-            
+
             <Link
               href="/festivals"
-              className="p-6 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 hover:border-rose-500 dark:hover:border-rose-400 transition-colors"
+              className="group p-8 bg-white border-2 border-retro-dark shadow-[4px_4px_0px_0px_rgba(26,44,50,1)] rounded-xl hover:-translate-y-1 hover:shadow-[8px_8px_0px_0px_rgba(26,44,50,1)] transition-all text-left"
             >
-              <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-2">
+              <div className="w-10 h-1 bg-retro-orange mb-4"></div>
+              <h3 className="text-xl font-black text-retro-dark mb-2 uppercase italic">
                 Browse Festivals
               </h3>
-              <p className="text-slate-600 dark:text-slate-400 text-sm">
-                View and explore festivals
+              <p className="text-retro-dark/70 font-medium text-sm group-hover:text-retro-dark transition-colors">
+                Find your next gig and start planning.
               </p>
             </Link>
-            
+
             <Link
               href="/groups"
-              className="p-6 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 hover:border-rose-500 dark:hover:border-rose-400 transition-colors"
+              className="group p-8 bg-retro-teal border-2 border-retro-dark shadow-[4px_4px_0px_0px_rgba(26,44,50,1)] rounded-xl hover:-translate-y-1 hover:shadow-[8px_8px_0px_0px_rgba(26,44,50,1)] transition-all text-left"
             >
-              <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-2">
-                My Groups
-              </h3>
-              <p className="text-slate-600 dark:text-slate-400 text-sm">
-                Manage your planning groups
+              <div className="w-10 h-1 bg-white mb-4"></div>
+              <div className="flex justify-between items-start">
+                <h3 className="text-xl font-black text-retro-dark mb-2 uppercase italic">
+                  My Groups
+                </h3>
+                <span className="bg-white text-retro-dark text-[10px] font-bold px-2 py-0.5 border border-retro-dark uppercase">Action</span>
+              </div>
+              <p className="text-retro-dark font-bold text-sm">
+                Manage your squads and heat maps.
               </p>
             </Link>
           </div>

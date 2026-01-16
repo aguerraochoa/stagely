@@ -145,7 +145,6 @@ export interface Database {
         Row: {
           id: string
           name: string
-          festival_day_id: string
           created_by: string
           invite_code: string
           created_at: string
@@ -154,7 +153,6 @@ export interface Database {
         Insert: {
           id?: string
           name: string
-          festival_day_id: string
           created_by: string
           invite_code: string
           created_at?: string
@@ -163,7 +161,6 @@ export interface Database {
         Update: {
           id?: string
           name?: string
-          festival_day_id?: string
           created_by?: string
           invite_code?: string
           created_at?: string
@@ -195,7 +192,6 @@ export interface Database {
           id: string
           user_id: string
           set_id: string
-          group_id: string
           priority: Priority
           created_at: string
           updated_at: string
@@ -204,7 +200,6 @@ export interface Database {
           id?: string
           user_id: string
           set_id: string
-          group_id: string
           priority: Priority
           created_at?: string
           updated_at?: string
@@ -213,8 +208,7 @@ export interface Database {
           id?: string
           user_id?: string
           set_id?: string
-          group_id?: string
-          priority?: Priority
+          priority: Priority
           created_at?: string
           updated_at?: string
         }

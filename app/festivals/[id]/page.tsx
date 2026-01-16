@@ -4,6 +4,7 @@ import { use, useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import type { Priority } from '@/types/database.types'
 
 type Festival = {
   id: string
@@ -32,6 +33,10 @@ type Set = {
   end_time: string | null
 }
 
+type User = {
+  id: string
+}
+
 export default function FestivalDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params)
   const [festival, setFestival] = useState<Festival | null>(null)
@@ -39,13 +44,19 @@ export default function FestivalDetailPage({ params }: { params: Promise<{ id: s
   const [selectedDay, setSelectedDay] = useState<string | null>(null)
   const [stages, setStages] = useState<Stage[]>([])
   const [sets, setSets] = useState<Set[]>([])
+  const [userSelections, setUserSelections] = useState<Record<string, Priority>>({})
   const [loading, setLoading] = useState(true)
+  const [currentUser, setCurrentUser] = useState<User | null>(null)
   const router = useRouter()
   const supabase = createClient()
 
   useEffect(() => {
     const fetchData = async () => {
       try {
+        // Get current user
+        const { data: { user } } = await supabase.auth.getUser()
+        setCurrentUser(user)
+
         // Fetch festival
         const { data: festivalData, error: festivalError } = await supabase
           .from('festivals')
@@ -88,7 +99,7 @@ export default function FestivalDetailPage({ params }: { params: Promise<{ id: s
     fetchData()
   }, [resolvedParams.id, router, supabase])
 
-  // Fetch stages and sets when day is selected
+  // Fetch stages, sets, and user selections when day is selected
   useEffect(() => {
     if (selectedDay) {
       const fetchStagesAndSets = async () => {
@@ -121,6 +132,26 @@ export default function FestivalDetailPage({ params }: { params: Promise<{ id: s
               setSets([])
             } else {
               setSets(setsData || [])
+
+              // If user is logged in, fetch their selections for these sets
+              if (currentUser) {
+                const setIds = setsData ? setsData.map(s => s.id) : []
+                if (setIds.length > 0) {
+                  const { data: selectionsData, error: selectionsError } = await supabase
+                    .from('user_selections')
+                    .select('set_id, priority')
+                    .eq('user_id', currentUser.id)
+                    .in('set_id', setIds)
+
+                  if (!selectionsError && selectionsData) {
+                    const selectionsMap: Record<string, Priority> = {}
+                    selectionsData.forEach(sel => {
+                      selectionsMap[sel.set_id] = sel.priority
+                    })
+                    setUserSelections(prev => ({ ...prev, ...selectionsMap }))
+                  }
+                }
+              }
             }
           } else {
             setSets([])
@@ -135,7 +166,59 @@ export default function FestivalDetailPage({ params }: { params: Promise<{ id: s
       setStages([])
       setSets([])
     }
-  }, [selectedDay, supabase])
+  }, [selectedDay, supabase, currentUser])
+
+  // Toggle priority logic: Red -> Yellow -> Green -> Off
+  const togglePriority = async (set: Set) => {
+    if (!currentUser) {
+      router.push('/login')
+      return
+    }
+
+    const currentPriority = userSelections[set.id]
+    let nextPriority: Priority | null = null
+
+    if (!currentPriority) nextPriority = 'red'
+    else if (currentPriority === 'red') nextPriority = 'yellow'
+    else if (currentPriority === 'yellow') nextPriority = 'green'
+    else nextPriority = null // Toggle off
+
+    // Optimistic update
+    setUserSelections(prev => {
+      const next = { ...prev }
+      if (nextPriority) {
+        next[set.id] = nextPriority
+      } else {
+        delete next[set.id]
+      }
+      return next
+    })
+
+    // Persist to DB
+    try {
+      if (nextPriority) {
+        const { error } = await supabase
+          .from('user_selections')
+          .upsert({
+            user_id: currentUser.id,
+            set_id: set.id,
+            priority: nextPriority
+          }, { onConflict: 'user_id, set_id' })
+
+        if (error) throw error
+      } else {
+        const { error } = await supabase
+          .from('user_selections')
+          .delete()
+          .match({ user_id: currentUser.id, set_id: set.id })
+
+        if (error) throw error
+      }
+    } catch (err) {
+      console.error('Error saving selection:', err)
+      // Revert optimistic update (simplified for now, could actuaally revert)
+    }
+  }
 
   // Helper functions for timetable
   const timeToMinutes = (time: string): number => {
@@ -171,12 +254,27 @@ export default function FestivalDetailPage({ params }: { params: Promise<{ id: s
     const startSlot = Math.floor((startMinutes - 12 * 60) / 15)
     const duration = endMinutes - startMinutes
     const heightSlots = Math.max(1, Math.ceil(duration / 15))
-    
+
     return {
       startSlot,
       heightSlots,
       startMinutes,
       endMinutes,
+    }
+  }
+
+  // Get color styles based on priority
+  // Get color styles based on priority
+  const getPriorityStyles = (priority?: Priority) => {
+    switch (priority) {
+      case 'green':
+        return 'bg-retro-teal text-retro-dark border-retro-dark shadow-[2px_2px_0px_0px_rgba(26,44,50,1)]'
+      case 'yellow':
+        return 'bg-retro-cream text-retro-dark border-retro-dark shadow-[2px_2px_0px_0px_rgba(26,44,50,1)]'
+      case 'red':
+        return 'bg-retro-orange text-white border-retro-dark shadow-[2px_2px_0px_0px_rgba(26,44,50,1)]'
+      default:
+        return 'bg-white text-retro-dark border-retro-dark hover:bg-slate-50'
     }
   }
 
@@ -193,26 +291,26 @@ export default function FestivalDetailPage({ params }: { params: Promise<{ id: s
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
-      <nav className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
+    <div className="min-h-screen bg-retro-cream text-retro-dark">
+      <nav className="bg-white border-b-2 border-retro-dark">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             <div className="flex items-center gap-4">
-              <Link href="/" className="text-2xl font-bold bg-gradient-to-r from-rose-600 to-rose-800 dark:from-rose-400 dark:to-rose-600 bg-clip-text text-transparent">
+              <Link href="/" className="text-2xl font-black uppercase italic tracking-tighter text-retro-dark">
                 Stagely
               </Link>
-              <span className="text-slate-400">/</span>
-              <Link href="/festivals" className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100">
+              <div className="h-6 w-0.5 bg-retro-dark"></div>
+              <Link href="/festivals" className="text-retro-dark font-black uppercase tracking-wider text-xs hover:text-retro-orange">
                 Festivals
               </Link>
-              <span className="text-slate-400">/</span>
-              <span className="text-slate-600 dark:text-slate-400">{festival.name} {festival.year}</span>
+              <span className="text-retro-dark/50 font-bold">/</span>
+              <span className="text-retro-dark font-bold uppercase tracking-wider text-xs">{festival.name} {festival.year}</span>
             </div>
             <Link
               href="/festivals"
-              className="px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100"
+              className="px-4 py-2 text-sm font-black uppercase tracking-wider text-retro-dark hover:text-retro-orange transition-colors"
             >
-              Back to Festivals
+              Back
             </Link>
           </div>
         </div>
@@ -220,76 +318,65 @@ export default function FestivalDetailPage({ params }: { params: Promise<{ id: s
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">
+          <h1 className="text-5xl font-black text-retro-dark mb-2 uppercase italic tracking-tighter">
             {festival.name} {festival.year}
           </h1>
-          <p className="text-slate-600 dark:text-slate-400">
-            Select a day to view the schedule
+          <p className="text-retro-dark font-bold opacity-70">
+            Tap artists to plan: <span className="inline-block px-1 bg-retro-orange text-white text-xs font-black border border-retro-dark">cool</span> → <span className="inline-block px-1 bg-retro-cream text-retro-dark text-xs font-black border border-retro-dark">interested</span> → <span className="inline-block px-1 bg-retro-teal text-retro-dark text-xs font-black border border-retro-dark">must go</span>
           </p>
         </div>
 
         {/* Days Tabs */}
         {days.length > 0 && (
-          <div className="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 mb-6 shadow-sm">
-            <div className="flex flex-wrap gap-3">
-              {days.map((day) => (
-                <button
-                  key={day.id}
-                  onClick={() => setSelectedDay(day.id)}
-                  className={`px-5 py-3 rounded-lg transition-all ${
-                    selectedDay === day.id
-                      ? 'bg-rose-600 text-white shadow-lg shadow-rose-200 dark:shadow-rose-900/50'
-                      : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
+          <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
+            {days.map((day) => (
+              <button
+                key={day.id}
+                onClick={() => setSelectedDay(day.id)}
+                className={`flex-shrink-0 px-6 py-2 text-sm font-black uppercase tracking-wider border-2 border-retro-dark transition-all ${selectedDay === day.id
+                  ? 'bg-retro-teal text-retro-dark shadow-[4px_4px_0px_0px_rgba(26,44,50,1)] -translate-y-1'
+                  : 'bg-white text-retro-dark hover:bg-slate-50'
                   }`}
-                >
-                  <div className="font-semibold text-sm">
-                    {day.day_name}
-                  </div>
-                  {day.date && (
-                    <div className={`text-xs mt-0.5 ${
-                      selectedDay === day.id
-                        ? 'text-rose-100'
-                        : 'text-slate-500 dark:text-slate-400'
-                    }`}>
-                      {new Date(day.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                    </div>
-                  )}
-                </button>
-              ))}
-            </div>
+              >
+                {day.day_name}
+                <span className="block text-[10px] opacity-70 font-bold">
+                  {new Date(day.date || '').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                </span>
+              </button>
+            ))}
           </div>
         )}
 
         {/* Timetable Grid */}
         {!selectedDay ? (
-          <div className="bg-white dark:bg-slate-800 p-12 rounded-xl border border-slate-200 dark:border-slate-700 text-center">
-            <p className="text-slate-600 dark:text-slate-400">
-              {days.length === 0 ? 'No days available for this festival.' : 'Select a day to view the schedule'}
+          <div className="bg-white border-2 border-retro-dark shadow-[8px_8px_0px_0px_rgba(26,44,50,1)] rounded-xl p-12 text-center">
+            <p className="text-retro-dark font-bold">
+              Select a day to view the schedule
             </p>
           </div>
         ) : stages.length === 0 ? (
-          <div className="bg-white dark:bg-slate-800 p-12 rounded-xl border border-slate-200 dark:border-slate-700 text-center">
-            <p className="text-slate-600 dark:text-slate-400">
-              No schedule available for this day yet.
+          <div className="bg-white border-2 border-retro-dark shadow-[8px_8px_0px_0px_rgba(26,44,50,1)] rounded-xl p-12 text-center">
+            <p className="text-retro-dark font-bold">
+              No schedule available yet.
             </p>
           </div>
         ) : (
-          <div className="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+          <div className="bg-white rounded-xl border-4 border-retro-dark shadow-[8px_8px_0px_0px_rgba(26,44,50,1)] overflow-hidden">
             <div className="overflow-x-auto">
               <div className="inline-block min-w-full">
                 {/* Timetable Grid */}
-                <div className="border-2 border-rose-300 dark:border-rose-700 rounded-lg bg-rose-50 dark:bg-rose-950" style={{ overflow: 'visible' }}>
+                <div className="bg-white relative" style={{ overflow: 'visible' }}>
                   {/* Header with stage names */}
-                  <div className="grid bg-rose-200 dark:bg-rose-900/40" style={{ gridTemplateColumns: `80px repeat(${stages.length}, minmax(120px, 1fr))` }}>
-                    <div className="p-3 font-bold text-rose-900 dark:text-rose-100 border-r-2 border-rose-300 dark:border-rose-700">
+                  <div className="grid bg-retro-cream border-b-2 border-retro-dark" style={{ gridTemplateColumns: `80px repeat(${stages.length}, minmax(140px, 1fr))` }}>
+                    <div className="p-3 text-xs font-black uppercase tracking-wider text-retro-dark">
                       Time
                     </div>
                     {stages.map((stage) => (
                       <div
                         key={stage.id}
-                        className="p-3 font-bold text-rose-900 dark:text-rose-100 border-r-2 border-rose-300 dark:border-rose-700 last:border-r-0"
+                        className="p-3 text-sm font-black uppercase text-retro-dark border-l-2 border-retro-dark"
                       >
-                        <span className="text-sm break-words">{stage.name}</span>
+                        {stage.name}
                       </div>
                     ))}
                   </div>
@@ -304,22 +391,22 @@ export default function FestivalDetailPage({ params }: { params: Promise<{ id: s
                       return (
                         <div
                           key={timeSlot}
-                          className="grid border-b border-slate-200 dark:border-slate-700 relative"
-                          style={{ 
-                            gridTemplateColumns: `80px repeat(${stages.length}, minmax(120px, 1fr))`, 
+                          className="grid border-b border-retro-dark/20 relative"
+                          style={{
+                            gridTemplateColumns: `80px repeat(${stages.length}, minmax(140px, 1fr))`,
                             minHeight: '24px',
                             overflow: 'visible'
                           }}
                         >
                           {/* Time column */}
-                          <div className="p-1.5 text-xs font-medium text-rose-800 dark:text-rose-200 border-r-2 border-rose-300 dark:border-rose-700 bg-rose-100 dark:bg-rose-900/30">
+                          <div className="p-1 text-xs font-bold text-retro-dark/50 bg-retro-cream/50 text-right pr-3 border-r-2 border-retro-dark">
                             {displayTime}
                           </div>
 
                           {/* Stage columns - render sets with absolute positioning */}
                           {stages.map((stage) => {
                             const stageSets = sets.filter(s => s.stage_id === stage.id)
-                            
+
                             // Find sets that start at this slot
                             const setsStartingHere = stageSets.filter(set => {
                               const pos = getSetPosition(set)
@@ -329,7 +416,7 @@ export default function FestivalDetailPage({ params }: { params: Promise<{ id: s
                             return (
                               <div
                                 key={`${stage.id}-slot-${slotIndex}`}
-                                className="border-r-2 border-rose-300 dark:border-rose-700 last:border-r-0 bg-white dark:bg-rose-950/50 relative"
+                                className="border-l-2 border-retro-dark last:border-r-0 relative"
                                 style={{ overflow: 'visible' }}
                               >
                                 {setsStartingHere.map((set) => {
@@ -337,56 +424,27 @@ export default function FestivalDetailPage({ params }: { params: Promise<{ id: s
                                   const heightPx = pos.heightSlots * 24 // 24px per 15-min slot
                                   const isShort = heightPx < 60
                                   const isVeryShort = heightPx < 40
-                                  
+                                  const priority = userSelections[set.id]
+
                                   return (
-                                    <div
+                                    <button
                                       key={set.id}
-                                      className="absolute left-1 right-1 top-0.5 bg-rose-200 dark:bg-rose-800 border-2 border-rose-400 dark:border-rose-600 rounded-md text-center shadow-sm z-10"
-                                      style={{ 
+                                      onClick={() => togglePriority(set)}
+                                      className={`absolute left-1 right-1 top-0.5 rounded-none border-2 z-10 hover:z-20 hover:scale-[1.02] transition-all overflow-hidden p-2 flex flex-col justify-center items-center ${getPriorityStyles(priority)}`}
+                                      style={{
                                         height: `${heightPx}px`,
-                                        minHeight: '32px',
-                                        padding: isVeryShort ? '4px 6px' : isShort ? '6px 8px' : '8px',
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        justifyContent: 'center',
-                                        alignItems: 'center',
-                                        overflow: 'hidden'
+                                        minHeight: '32px'
                                       }}
-                                      title={`${set.artist_name}${set.end_time ? ` (${formatTime(set.start_time)} - ${formatTime(set.end_time)})` : ` (${formatTime(set.start_time)})`}`}
                                     >
-                                      <div 
-                                        className={`font-semibold text-rose-900 dark:text-rose-50 ${
-                                          isVeryShort ? 'text-xs' : isShort ? 'text-xs' : 'text-sm'
-                                        }`}
-                                        style={{ 
-                                          wordBreak: 'break-word',
-                                          overflowWrap: 'break-word',
-                                          lineHeight: '1.3',
-                                          overflow: isVeryShort || isShort ? 'hidden' : 'visible',
-                                          ...(isVeryShort || isShort ? {
-                                            display: '-webkit-box',
-                                            WebkitLineClamp: isVeryShort ? 1 : 2,
-                                            WebkitBoxOrient: 'vertical',
-                                            textOverflow: 'ellipsis'
-                                          } : {})
-                                        }}
-                                      >
+                                      <div className={`font-black text-xs uppercase truncate leading-tight w-full ${isVeryShort ? 'text-[10px]' : ''}`}>
                                         {set.artist_name}
                                       </div>
                                       {!isVeryShort && (
-                                        <div 
-                                          className={`text-rose-700 dark:text-rose-300 mt-1 flex-shrink-0 ${
-                                            isShort ? 'text-[10px]' : 'text-xs'
-                                          }`}
-                                          style={{
-                                            lineHeight: '1.2'
-                                          }}
-                                        >
+                                        <div className="text-[10px] font-bold opacity-80 mt-1">
                                           {formatTime(set.start_time)}
-                                          {set.end_time && ` - ${formatTime(set.end_time)}`}
                                         </div>
                                       )}
-                                    </div>
+                                    </button>
                                   )
                                 })}
                               </div>

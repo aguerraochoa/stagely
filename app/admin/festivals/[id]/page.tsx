@@ -11,21 +11,21 @@ export default function FestivalManagementPage() {
   const festivalId = params.id as string
   const router = useRouter()
   const supabase = createClient()
-  
+
   const [festival, setFestival] = useState<Festival | null>(null)
   const [days, setDays] = useState<FestivalDay[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedDay, setSelectedDay] = useState<string | null>(null)
   const [stages, setStages] = useState<Record<string, Stage[]>>({})
   const [sets, setSets] = useState<Record<string, Set[]>>({})
-  
+
   // CSV Import state
   const [showCSVImport, setShowCSVImport] = useState(false)
   const [csvContent, setCsvContent] = useState('')
   const [importDayName, setImportDayName] = useState('')
   const [importDate, setImportDate] = useState('')
   const [importing, setImporting] = useState(false)
-  
+
   // Edit state
   const [editingSet, setEditingSet] = useState<Set | null>(null)
   const [editingSetArtist, setEditingSetArtist] = useState('')
@@ -66,7 +66,7 @@ export default function FestivalManagementPage() {
     setFestival(data)
     setFestivalName(data.name)
     setFestivalYear(data.year)
-    
+
     // Fetch days
     const { data: daysData, error: daysError } = await supabase
       .from('festival_days')
@@ -352,7 +352,7 @@ export default function FestivalManagementPage() {
 
     setSets(prev => ({
       ...prev,
-      [dayId]: [...(prev[dayId] || []), data].sort((a, b) => 
+      [dayId]: [...(prev[dayId] || []), data].sort((a, b) =>
         a.start_time.localeCompare(b.start_time)
       )
     }))
@@ -456,7 +456,7 @@ export default function FestivalManagementPage() {
       // Parse CSV
       const lines = csvContent.trim().split('\n')
       const headers = lines[0].toLowerCase().split(',').map(h => h.trim())
-      
+
       // Find column indices
       const stageIdx = headers.indexOf('stage')
       const artistIdx = headers.indexOf('artist')
@@ -470,7 +470,7 @@ export default function FestivalManagementPage() {
       // Create or get the day
       let dayId: string
       const existingDay = days.find(d => d.day_name === importDayName)
-      
+
       if (existingDay) {
         dayId = existingDay.id
       } else {
@@ -490,12 +490,12 @@ export default function FestivalManagementPage() {
       }
 
       // Group sets by stage
-      const stageSets: Record<string, Array<{artist: string, start: string, end: string | null}>> = {}
-      
+      const stageSets: Record<string, Array<{ artist: string, start: string, end: string | null }>> = {}
+
       for (let i = 1; i < lines.length; i++) {
         const line = lines[i].trim()
         if (!line) continue
-        
+
         const values = line.split(',').map(v => v.trim())
         const stageName = values[stageIdx]
         const artist = values[artistIdx]
@@ -507,7 +507,7 @@ export default function FestivalManagementPage() {
         if (!stageSets[stageName]) {
           stageSets[stageName] = []
         }
-        
+
         stageSets[stageName].push({ artist, start: startTime, end: endTime })
       }
 
@@ -546,7 +546,7 @@ export default function FestivalManagementPage() {
                 .eq('festival_day_id', dayId)
                 .eq('name', stageName)
                 .single()
-              
+
               if (existingStage) {
                 stage = existingStage
               } else {
@@ -652,7 +652,7 @@ export default function FestivalManagementPage() {
     const startSlot = Math.floor((startMinutes - 12 * 60) / 15)
     const duration = endMinutes - startMinutes
     const heightSlots = Math.max(1, Math.ceil(duration / 15))
-    
+
     return {
       startSlot,
       heightSlots,
@@ -821,7 +821,7 @@ export default function FestivalManagementPage() {
                 <textarea
                   value={csvContent}
                   onChange={(e) => setCsvContent(e.target.value)}
-                  placeholder="stage,artist,start_time,end_time&#10;T-Mobile,Asleep At The Wheel,12:45,13:30&#10;..."
+                  placeholder="stage,artist,start_time,end_time"
                   rows={10}
                   className="w-full px-4 py-2 border-2 border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-rose-500 font-mono text-sm"
                 />
@@ -897,11 +897,10 @@ export default function FestivalManagementPage() {
               ) : (
                 <div
                   key={day.id}
-                  className={`group relative inline-flex items-center px-5 py-3 rounded-lg transition-all ${
-                    selectedDay === day.id
-                      ? 'bg-rose-600 text-white shadow-lg shadow-rose-200 dark:shadow-rose-900/50'
-                      : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
-                  }`}
+                  className={`group relative inline-flex items-center px-5 py-3 rounded-lg transition-all ${selectedDay === day.id
+                    ? 'bg-rose-600 text-white shadow-lg shadow-rose-200 dark:shadow-rose-900/50'
+                    : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
+                    }`}
                 >
                   <button
                     onClick={() => setSelectedDay(day.id)}
@@ -911,11 +910,10 @@ export default function FestivalManagementPage() {
                       {day.day_name}
                     </div>
                     {day.date && (
-                      <div className={`text-xs mt-0.5 ${
-                        selectedDay === day.id
-                          ? 'text-rose-100'
-                          : 'text-slate-500 dark:text-slate-400'
-                      }`}>
+                      <div className={`text-xs mt-0.5 ${selectedDay === day.id
+                        ? 'text-rose-100'
+                        : 'text-slate-500 dark:text-slate-400'
+                        }`}>
                         {new Date(day.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                       </div>
                     )}
@@ -925,11 +923,10 @@ export default function FestivalManagementPage() {
                       e.stopPropagation()
                       handleStartEditDay(day)
                     }}
-                    className={`ml-2 p-1.5 rounded-md transition-all ${
-                      selectedDay === day.id
-                        ? 'text-white hover:bg-rose-700'
-                        : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
-                    } opacity-0 group-hover:opacity-100 ${selectedDay === day.id ? 'opacity-100' : ''}`}
+                    className={`ml-2 p-1.5 rounded-md transition-all ${selectedDay === day.id
+                      ? 'text-white hover:bg-rose-700'
+                      : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
+                      } opacity-0 group-hover:opacity-100 ${selectedDay === day.id ? 'opacity-100' : ''}`}
                     title="Edit day"
                   >
                     <svg
@@ -955,131 +952,129 @@ export default function FestivalManagementPage() {
 
         {/* Timetable Grid Panel - Full Width */}
         <div className="bg-white dark:bg-slate-800 p-6 rounded-lg border border-slate-200 dark:border-slate-700">
-            {!selectedDay ? (
-              <p className="text-slate-600 dark:text-slate-400 text-center py-8">
-                Select a day to view the timetable
+          {!selectedDay ? (
+            <p className="text-slate-600 dark:text-slate-400 text-center py-8">
+              Select a day to view the timetable
+            </p>
+          ) : currentStages.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-slate-600 dark:text-slate-400 mb-4">
+                No stages yet. Add your first stage or import from CSV!
               </p>
-            ) : currentStages.length === 0 ? (
-              <div className="text-center py-8">
-                <p className="text-slate-600 dark:text-slate-400 mb-4">
-                  No stages yet. Add your first stage or import from CSV!
-                </p>
-                <button
-                  onClick={() => handleAddStage(selectedDay)}
-                  className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-medium transition-all"
-                >
-                  + Add Stage
-                </button>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <div className="inline-block min-w-full">
-                  {/* Timetable Grid */}
-                  <div className="border-2 border-rose-300 dark:border-rose-700 rounded-lg overflow-hidden bg-rose-50 dark:bg-rose-950">
-                    {/* Header with stage names */}
-                    <div className="grid bg-rose-200 dark:bg-rose-900/40" style={{ gridTemplateColumns: `80px repeat(${currentStages.length}, 1fr)` }}>
-                      <div className="p-3 font-bold text-rose-900 dark:text-rose-100 border-r-2 border-rose-300 dark:border-rose-700">
-                        Time
-                      </div>
-                      {currentStages.map((stage) => (
-                        <button
-                          key={stage.id}
-                          onClick={() => handleStartEditStage(stage)}
-                          className="p-2 font-bold text-rose-900 dark:text-rose-100 border-r-2 border-rose-300 dark:border-rose-700 last:border-r-0 hover:bg-rose-300/20 dark:hover:bg-rose-900/30 transition-all cursor-pointer"
-                        >
-                          <span className="text-sm">{stage.name}</span>
-                        </button>
-                      ))}
+              <button
+                onClick={() => handleAddStage(selectedDay)}
+                className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-medium transition-all"
+              >
+                + Add Stage
+              </button>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <div className="inline-block min-w-full">
+                {/* Timetable Grid */}
+                <div className="border-2 border-rose-300 dark:border-rose-700 rounded-lg overflow-hidden bg-rose-50 dark:bg-rose-950">
+                  {/* Header with stage names */}
+                  <div className="grid bg-rose-200 dark:bg-rose-900/40" style={{ gridTemplateColumns: `80px repeat(${currentStages.length}, 1fr)` }}>
+                    <div className="p-3 font-bold text-rose-900 dark:text-rose-100 border-r-2 border-rose-300 dark:border-rose-700">
+                      Time
                     </div>
-
-                    {/* Time slots and sets */}
-                    <div className="relative">
-                      {timeSlots.map((timeSlot, slotIndex) => {
-                        const [hours, minutes] = timeSlot.split(':').map(Number)
-                        const isHourMark = minutes === 0
-                        const displayTime = isHourMark ? formatTime(timeSlot) : ''
-
-                        return (
-                          <div
-                            key={timeSlot}
-                            className="grid border-b border-slate-200 dark:border-slate-700 relative"
-                            style={{ gridTemplateColumns: `80px repeat(${currentStages.length}, 1fr)`, minHeight: '24px' }}
-                          >
-                            {/* Time column */}
-                            <div className="p-1.5 text-xs font-medium text-rose-800 dark:text-rose-200 border-r-2 border-rose-300 dark:border-rose-700 bg-rose-100 dark:bg-rose-900/30">
-                              {displayTime}
-                            </div>
-
-                            {/* Stage columns - render sets with absolute positioning */}
-                            {currentStages.map((stage, stageIndex) => {
-                              const stageSets = currentSets.filter(s => s.stage_id === stage.id)
-                              
-                              // Find sets that start at this slot
-                              const setsStartingHere = stageSets.filter(set => {
-                                const pos = getSetPosition(set)
-                                return slotIndex === pos.startSlot
-                              })
-
-                              return (
-                                <div
-                                  key={`${stage.id}-slot-${slotIndex}`}
-                                  className="border-r-2 border-rose-300 dark:border-rose-700 last:border-r-0 bg-white dark:bg-rose-950/50 relative"
-                                >
-                                  {setsStartingHere.map((set) => {
-                                    const pos = getSetPosition(set)
-                                    const heightPx = pos.heightSlots * 24 // 24px per 15-min slot
-                                    const isShort = heightPx < 60
-                                    const isVeryShort = heightPx < 40
-                                    
-                                    return (
-                                      <button
-                                        key={set.id}
-                                        onClick={() => handleStartEditSet(set)}
-                                        className="absolute left-1 right-1 top-0.5 bg-rose-200 dark:bg-rose-800 hover:bg-rose-300 dark:hover:bg-rose-700 border-2 border-rose-400 dark:border-rose-600 rounded-md text-left transition-all cursor-pointer z-10 shadow-sm overflow-hidden"
-                                        style={{ 
-                                          height: `${heightPx}px`,
-                                          minHeight: '32px',
-                                          padding: isVeryShort ? '4px 6px' : isShort ? '6px 8px' : '8px'
-                                        }}
-                                        title={`${set.artist_name}${set.end_time ? ` (${formatTime(set.start_time)} - ${formatTime(set.end_time)})` : ` (${formatTime(set.start_time)})`}`}
-                                      >
-                                        <div className={`font-semibold text-rose-900 dark:text-rose-50 truncate leading-tight ${
-                                          isVeryShort ? 'text-xs' : isShort ? 'text-xs' : 'text-sm'
-                                        }`}>
-                                          {set.artist_name}
-                                        </div>
-                                        {!isVeryShort && (
-                                          <div className={`text-rose-700 dark:text-rose-300 truncate leading-tight ${
-                                            isShort ? 'text-[10px] mt-0.5' : 'text-xs mt-0.5'
-                                          }`}>
-                                            {formatTime(set.start_time)}
-                                            {set.end_time && ` - ${formatTime(set.end_time)}`}
-                                          </div>
-                                        )}
-                                      </button>
-                                    )
-                                  })}
-                                </div>
-                              )
-                            })}
-                          </div>
-                        )
-                      })}
-                    </div>
+                    {currentStages.map((stage) => (
+                      <button
+                        key={stage.id}
+                        onClick={() => handleStartEditStage(stage)}
+                        className="p-2 font-bold text-rose-900 dark:text-rose-100 border-r-2 border-rose-300 dark:border-rose-700 last:border-r-0 hover:bg-rose-300/20 dark:hover:bg-rose-900/30 transition-all cursor-pointer"
+                      >
+                        <span className="text-sm">{stage.name}</span>
+                      </button>
+                    ))}
                   </div>
 
-                  {/* Add Stage button */}
-                  <div className="mt-4 flex justify-end">
-                    <button
-                      onClick={() => handleAddStage(selectedDay)}
-                      className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-medium transition-all"
-                    >
-                      + Add Stage
-                    </button>
+                  {/* Time slots and sets */}
+                  <div className="relative">
+                    {timeSlots.map((timeSlot, slotIndex) => {
+                      const [hours, minutes] = timeSlot.split(':').map(Number)
+                      const isHourMark = minutes === 0
+                      const displayTime = isHourMark ? formatTime(timeSlot) : ''
+
+                      return (
+                        <div
+                          key={timeSlot}
+                          className="grid border-b border-slate-200 dark:border-slate-700 relative"
+                          style={{ gridTemplateColumns: `80px repeat(${currentStages.length}, 1fr)`, minHeight: '24px' }}
+                        >
+                          {/* Time column */}
+                          <div className="p-1.5 text-xs font-medium text-rose-800 dark:text-rose-200 border-r-2 border-rose-300 dark:border-rose-700 bg-rose-100 dark:bg-rose-900/30">
+                            {displayTime}
+                          </div>
+
+                          {/* Stage columns - render sets with absolute positioning */}
+                          {currentStages.map((stage, stageIndex) => {
+                            const stageSets = currentSets.filter(s => s.stage_id === stage.id)
+
+                            // Find sets that start at this slot
+                            const setsStartingHere = stageSets.filter(set => {
+                              const pos = getSetPosition(set)
+                              return slotIndex === pos.startSlot
+                            })
+
+                            return (
+                              <div
+                                key={`${stage.id}-slot-${slotIndex}`}
+                                className="border-r-2 border-rose-300 dark:border-rose-700 last:border-r-0 bg-white dark:bg-rose-950/50 relative"
+                              >
+                                {setsStartingHere.map((set) => {
+                                  const pos = getSetPosition(set)
+                                  const heightPx = pos.heightSlots * 24 // 24px per 15-min slot
+                                  const isShort = heightPx < 60
+                                  const isVeryShort = heightPx < 40
+
+                                  return (
+                                    <button
+                                      key={set.id}
+                                      onClick={() => handleStartEditSet(set)}
+                                      className="absolute left-1 right-1 top-0.5 bg-rose-200 dark:bg-rose-800 hover:bg-rose-300 dark:hover:bg-rose-700 border-2 border-rose-400 dark:border-rose-600 rounded-md text-left transition-all cursor-pointer z-10 shadow-sm overflow-hidden"
+                                      style={{
+                                        height: `${heightPx}px`,
+                                        minHeight: '32px',
+                                        padding: isVeryShort ? '4px 6px' : isShort ? '6px 8px' : '8px'
+                                      }}
+                                      title={`${set.artist_name}${set.end_time ? ` (${formatTime(set.start_time)} - ${formatTime(set.end_time)})` : ` (${formatTime(set.start_time)})`}`}
+                                    >
+                                      <div className={`font-semibold text-rose-900 dark:text-rose-50 truncate leading-tight ${isVeryShort ? 'text-xs' : isShort ? 'text-xs' : 'text-sm'
+                                        }`}>
+                                        {set.artist_name}
+                                      </div>
+                                      {!isVeryShort && (
+                                        <div className={`text-rose-700 dark:text-rose-300 truncate leading-tight ${isShort ? 'text-[10px] mt-0.5' : 'text-xs mt-0.5'
+                                          }`}>
+                                          {formatTime(set.start_time)}
+                                          {set.end_time && ` - ${formatTime(set.end_time)}`}
+                                        </div>
+                                      )}
+                                    </button>
+                                  )
+                                })}
+                              </div>
+                            )
+                          })}
+                        </div>
+                      )
+                    })}
                   </div>
                 </div>
+
+                {/* Add Stage button */}
+                <div className="mt-4 flex justify-end">
+                  <button
+                    onClick={() => handleAddStage(selectedDay)}
+                    className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-medium transition-all"
+                  >
+                    + Add Stage
+                  </button>
+                </div>
               </div>
-            )}
+            </div>
+          )}
         </div>
 
         {/* Edit Set Modal */}

@@ -52,20 +52,20 @@ export default function FestivalsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
-      <nav className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
+    <div className="min-h-screen bg-retro-cream text-retro-dark">
+      <nav className="bg-white border-b-2 border-retro-dark">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             <div className="flex items-center gap-4">
-              <Link href="/" className="text-2xl font-bold bg-gradient-to-r from-rose-600 to-rose-800 dark:from-rose-400 dark:to-rose-600 bg-clip-text text-transparent">
+              <Link href="/" className="text-2xl font-black uppercase italic tracking-tighter text-retro-dark">
                 Stagely
               </Link>
-              <span className="text-slate-400">/</span>
-              <span className="text-slate-600 dark:text-slate-400">Festivals</span>
+              <div className="h-6 w-0.5 bg-retro-dark"></div>
+              <span className="text-retro-dark font-bold uppercase tracking-widest text-xs">Festivals</span>
             </div>
             <Link
               href="/"
-              className="px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100"
+              className="px-4 py-2 text-sm font-black uppercase tracking-wider text-retro-dark hover:text-retro-orange transition-colors"
             >
               Home
             </Link>
@@ -74,23 +74,23 @@ export default function FestivalsPage() {
       </nav>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">
+        <div className="mb-12">
+          <h1 className="text-5xl font-black text-retro-dark mb-2 uppercase italic tracking-tighter">
             Browse Festivals
           </h1>
-          <p className="text-slate-600 dark:text-slate-400">
+          <p className="text-retro-dark font-bold opacity-70">
             Select a festival to view schedules and plan with your group
           </p>
         </div>
 
         {festivals.length === 0 ? (
-          <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-12 text-center">
-            <p className="text-slate-600 dark:text-slate-400 mb-4">
+          <div className="bg-white border-2 border-retro-dark shadow-[8px_8px_0px_0px_rgba(26,44,50,1)] rounded-xl p-12 text-center">
+            <p className="text-retro-dark font-bold mb-4">
               No festivals available yet.
             </p>
             <Link
               href="/admin"
-              className="inline-block px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-medium transition-all"
+              className="inline-block px-6 py-3 bg-retro-orange text-white border-2 border-retro-dark font-black uppercase tracking-wider shadow-[4px_4px_0px_0px_rgba(26,44,50,1)] hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_rgba(26,44,50,1)] transition-all"
             >
               Create Festival
             </Link>
@@ -101,29 +101,18 @@ export default function FestivalsPage() {
               <Link
                 key={festival.id}
                 href={`/festivals/${festival.id}`}
-                className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6 hover:border-rose-500 dark:hover:border-rose-400 hover:shadow-lg transition-all"
+                className="group bg-white border-2 border-retro-dark shadow-[4px_4px_0px_0px_rgba(26,44,50,1)] rounded-xl p-6 hover:-translate-y-1 hover:shadow-[8px_8px_0px_0px_rgba(26,44,50,1)] transition-all"
               >
-                <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-1">
+                <div className="w-8 h-1 bg-retro-teal mb-4 group-hover:w-full transition-all duration-300"></div>
+                <h2 className="text-2xl font-black text-retro-dark uppercase italic mb-1">
                   {festival.name}
                 </h2>
-                <p className="text-slate-600 dark:text-slate-400 text-sm mb-4">
+                <p className="text-retro-dark/60 font-black mb-4">
                   {festival.year}
                 </p>
-                <div className="flex items-center text-rose-600 dark:text-rose-400 text-sm font-medium">
+                <div className="flex items-center text-retro-orange font-black text-sm uppercase tracking-wider">
                   View Schedule
-                  <svg
-                    className="ml-2 h-4 w-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 5l7 7-7 7"
-                    />
-                  </svg>
+                  <span className="ml-2 group-hover:translate-x-1 transition-transform">&rarr;</span>
                 </div>
               </Link>
             ))}

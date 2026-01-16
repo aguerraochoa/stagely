@@ -1,8 +1,16 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Default (will be overridden by dark mode media query if needed) */
+  --background: #FAF8D8; /* Cream */
+  --foreground: #1A2C32; /* Dark Teal */
+  
+  /* Retro Palette */
+  --color-retro-teal: #88C9C0;
+  --color-retro-blue: #4A92A2;
+  --color-retro-cream: #FAF8D8;
+  --color-retro-orange: #E68045;
+  --color-retro-dark: #1A2C32;
 }
 
 @theme inline {
@@ -10,12 +18,19 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  
+  /* Expose Retro Colors */
+  --color-retro-teal: var(--color-retro-teal);
+  --color-retro-blue: var(--color-retro-blue);
+  --color-retro-cream: var(--color-retro-cream);
+  --color-retro-orange: var(--color-retro-orange);
+  --color-retro-dark: var(--color-retro-dark);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #1A2C32; /* Dark Blue */
+    --foreground: #FAF8D8; /* Cream */
   }
 }
 

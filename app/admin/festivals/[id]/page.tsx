@@ -600,7 +600,7 @@ export default function FestivalManagementPage() {
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-rose-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-retro-orange"></div>
       </div>
     )
   }
@@ -662,20 +662,20 @@ export default function FestivalManagementPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
-      <nav className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
+    <div className="min-h-screen bg-retro-cream text-retro-dark">
+      <nav className="bg-white border-b-2 border-retro-dark">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             <div className="flex items-center gap-4">
-              <Link href="/" className="text-2xl font-bold bg-gradient-to-r from-rose-600 to-rose-800 dark:from-rose-400 dark:to-rose-600 bg-clip-text text-transparent">
+              <Link href="/" className="text-2xl font-black uppercase italic tracking-tighter text-retro-dark">
                 Stagely
               </Link>
-              <span className="text-slate-400">/</span>
-              <Link href="/admin" className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100">
+              <div className="h-6 w-0.5 bg-retro-dark"></div>
+              <Link href="/admin" className="text-retro-dark font-bold uppercase tracking-wider text-xs hover:text-retro-orange">
                 Admin
               </Link>
-              <span className="text-slate-400">/</span>
-              <span className="text-slate-600 dark:text-slate-400">{festival.name} {festival.year}</span>
+              <span className="text-retro-dark/50 font-bold">/</span>
+              <span className="text-retro-dark font-bold uppercase tracking-wider text-xs truncate max-w-[150px] md:max-w-none">{festival.name}</span>
             </div>
           </div>
         </div>
@@ -684,22 +684,22 @@ export default function FestivalManagementPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-6">
           {editingFestival ? (
-            <div className="bg-white dark:bg-slate-800 p-4 rounded-lg border border-slate-200 dark:border-slate-700 mb-2">
+            <div className="bg-white border-2 border-retro-dark shadow-[4px_4px_0px_0px_rgba(26,44,50,1)] p-4 rounded-lg mb-2">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-xs font-black text-retro-dark uppercase tracking-wider mb-2">
                     Festival Name
                   </label>
                   <input
                     type="text"
                     value={festivalName}
                     onChange={(e) => setFestivalName(e.target.value)}
-                    className="w-full px-4 py-2 text-lg font-semibold text-slate-900 dark:text-slate-100 border-2 border-rose-500 rounded-lg bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-rose-500"
+                    className="w-full px-4 py-3 text-lg font-bold text-retro-dark border-2 border-retro-dark rounded-lg bg-white focus:shadow-[4px_4px_0px_0px_rgba(26,44,50,1)] focus:-translate-y-0.5 outline-none transition-all"
                     autoFocus
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-xs font-black text-retro-dark uppercase tracking-wider mb-2">
                     Year
                   </label>
                   <input
@@ -708,14 +708,14 @@ export default function FestivalManagementPage() {
                     onChange={(e) => setFestivalYear(parseInt(e.target.value) || 0)}
                     min="2020"
                     max="2100"
-                    className="w-full px-4 py-2 text-lg font-semibold text-slate-900 dark:text-slate-100 border-2 border-rose-500 rounded-lg bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-rose-500"
+                    className="w-full px-4 py-3 text-lg font-bold text-retro-dark border-2 border-retro-dark rounded-lg bg-white focus:shadow-[4px_4px_0px_0px_rgba(26,44,50,1)] focus:-translate-y-0.5 outline-none transition-all"
                   />
                 </div>
               </div>
               <div className="flex gap-2">
                 <button
                   onClick={handleEditFestival}
-                  className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-semibold transition-all"
+                  className="px-4 py-2 bg-retro-orange hover:bg-retro-dark text-white border-2 border-retro-dark font-black uppercase tracking-wider rounded-lg shadow-[2px_2px_0px_0px_rgba(26,44,50,1)] transition-all"
                 >
                   Save Changes
                 </button>
@@ -725,7 +725,7 @@ export default function FestivalManagementPage() {
                     setFestivalName(festival.name)
                     setFestivalYear(festival.year)
                   }}
-                  className="px-4 py-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-lg font-semibold transition-all"
+                  className="px-4 py-2 bg-white hover:bg-retro-cream text-retro-dark border-2 border-retro-dark font-bold rounded-lg transition-all"
                 >
                   Cancel
                 </button>
@@ -733,7 +733,7 @@ export default function FestivalManagementPage() {
             </div>
           ) : (
             <div className="flex items-center gap-4 mb-2">
-              <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">
+              <h1 className="text-2xl md:text-3xl font-black text-retro-dark uppercase italic tracking-tighter">
                 {festival.name} {festival.year}
               </h1>
               <button
@@ -742,22 +742,22 @@ export default function FestivalManagementPage() {
                   setFestivalName(festival.name)
                   setFestivalYear(festival.year)
                 }}
-                className="px-3 py-1 text-sm bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-lg font-medium transition-all"
+                className="px-3 py-1 text-sm bg-white hover:bg-retro-cream text-retro-dark border-2 border-retro-dark font-bold rounded-lg transition-all"
                 title="Edit festival name and year"
               >
                 ✏️ Edit
               </button>
             </div>
           )}
-          <p className="text-slate-600 dark:text-slate-400">
+          <p className="text-retro-dark font-bold opacity-70">
             Manage days, stages, and sets for this festival
           </p>
         </div>
 
         {/* CSV Import Section */}
-        <div className="mb-6 bg-white dark:bg-slate-800 p-6 rounded-lg border border-slate-200 dark:border-slate-700">
+        <div className="mb-6 bg-white border-2 border-retro-dark shadow-[4px_4px_0px_0px_rgba(26,44,50,1)] p-6 rounded-xl">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
+            <h2 className="text-xl font-black text-retro-dark uppercase italic tracking-tight">
               Import from CSV
             </h2>
             <button
@@ -769,7 +769,7 @@ export default function FestivalManagementPage() {
                   setImportDate('')
                 }
               }}
-              className="px-3 py-1 text-sm bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-medium transition-all"
+              className="px-4 py-2 text-sm bg-retro-orange text-white border-2 border-retro-dark font-black uppercase tracking-wider rounded-lg shadow-[2px_2px_0px_0px_rgba(26,44,50,1)] transition-all"
             >
               {showCSVImport ? 'Cancel' : '+ Import CSV'}
             </button>
@@ -842,12 +842,12 @@ export default function FestivalManagementPage() {
         </div>
 
         {/* Days Tabs at Top */}
-        <div className="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 mb-6 shadow-sm">
+        <div className="bg-white border-2 border-retro-dark shadow-[4px_4px_0px_0px_rgba(26,44,50,1)] p-6 rounded-xl mb-6">
           <div className="flex justify-between items-center mb-5">
-            <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Days</h2>
+            <h2 className="text-xl font-black text-retro-dark uppercase italic tracking-tight">Days</h2>
             <button
               onClick={handleAddDay}
-              className="px-4 py-2 text-sm bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-700 hover:to-rose-800 text-white rounded-lg font-semibold transition-all shadow-md hover:shadow-lg"
+              className="px-4 py-2 text-sm bg-retro-teal text-retro-dark border-2 border-retro-dark font-black uppercase tracking-wider rounded-lg shadow-[2px_2px_0px_0px_rgba(26,44,50,1)] transition-all"
             >
               + Add Day
             </button>
@@ -855,12 +855,12 @@ export default function FestivalManagementPage() {
           <div className="flex flex-wrap gap-3">
             {days.map((day) => (
               editingDay === day.id ? (
-                <div key={day.id} className="bg-gradient-to-br from-rose-50 to-rose-100 dark:from-rose-950 dark:to-rose-900 p-4 rounded-xl border-2 border-rose-500 shadow-lg flex items-center gap-3">
+                <div key={day.id} className="bg-white p-4 rounded-xl border-2 border-retro-dark shadow-[4px_4px_0px_0px_rgba(26,44,50,1)] flex items-center gap-3">
                   <input
                     type="text"
                     value={editingDayName}
                     onChange={(e) => setEditingDayName(e.target.value)}
-                    className="px-4 py-2 text-sm font-semibold text-slate-900 dark:text-slate-100 border-2 border-rose-500 rounded-lg bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2"
+                    className="px-4 py-2 text-sm font-bold text-retro-dark border-2 border-retro-dark rounded-lg bg-white focus:shadow-[4px_4px_0px_0px_rgba(26,44,50,1)] focus:-translate-y-0.5 outline-none transition-all"
                     placeholder="Day name"
                     autoFocus
                   />
@@ -868,17 +868,17 @@ export default function FestivalManagementPage() {
                     type="date"
                     value={editingDayDate}
                     onChange={(e) => setEditingDayDate(e.target.value)}
-                    className="px-4 py-2 text-xs text-slate-600 dark:text-slate-400 border-2 border-rose-500 rounded-lg bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2"
+                    className="px-4 py-2 text-xs text-retro-dark border-2 border-retro-dark rounded-lg bg-white focus:shadow-[4px_4px_0px_0px_rgba(26,44,50,1)] focus:-translate-y-0.5 outline-none transition-all"
                   />
                   <button
                     onClick={() => handleSaveDay(day.id)}
-                    className="px-4 py-2 text-xs bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-semibold transition-all shadow-md hover:shadow-lg"
+                    className="px-4 py-2 text-xs bg-retro-teal text-retro-dark border-2 border-retro-dark rounded-lg font-black uppercase tracking-wider shadow-[2px_2px_0px_0px_rgba(26,44,50,1)] transition-all"
                   >
                     Save
                   </button>
                   <button
                     onClick={handleCancelEditDay}
-                    className="px-4 py-2 text-xs bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-lg font-semibold transition-all"
+                    className="px-4 py-2 text-xs bg-white hover:bg-retro-cream text-retro-dark border-2 border-retro-dark rounded-lg font-bold transition-all"
                   >
                     Cancel
                   </button>
@@ -889,7 +889,7 @@ export default function FestivalManagementPage() {
                         handleCancelEditDay()
                       }
                     }}
-                    className="px-4 py-2 text-xs bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition-all shadow-md hover:shadow-lg"
+                    className="px-4 py-2 text-xs bg-retro-orange text-white border-2 border-retro-dark rounded-lg font-black uppercase tracking-wider shadow-[2px_2px_0px_0px_rgba(26,44,50,1)] transition-all"
                   >
                     Delete
                   </button>
@@ -897,23 +897,20 @@ export default function FestivalManagementPage() {
               ) : (
                 <div
                   key={day.id}
-                  className={`group relative inline-flex items-center px-5 py-3 rounded-lg transition-all ${selectedDay === day.id
-                    ? 'bg-rose-600 text-white shadow-lg shadow-rose-200 dark:shadow-rose-900/50'
-                    : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
+                  className={`group relative inline-flex items-center px-5 py-3 rounded-lg border-2 border-retro-dark transition-all ${selectedDay === day.id
+                    ? 'bg-retro-teal text-retro-dark shadow-[4px_4px_0px_0px_rgba(26,44,50,1)] -translate-y-1'
+                    : 'bg-white text-retro-dark hover:bg-retro-cream shadow-[2px_2px_0px_0px_rgba(26,44,50,1)]'
                     }`}
                 >
                   <button
                     onClick={() => setSelectedDay(day.id)}
                     className="text-left flex-1"
                   >
-                    <div className="font-semibold text-sm">
+                    <div className="font-black text-sm uppercase tracking-tight">
                       {day.day_name}
                     </div>
                     {day.date && (
-                      <div className={`text-xs mt-0.5 ${selectedDay === day.id
-                        ? 'text-rose-100'
-                        : 'text-slate-500 dark:text-slate-400'
-                        }`}>
+                      <div className="text-xs mt-0.5 font-bold opacity-70">
                         {new Date(day.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                       </div>
                     )}
@@ -923,10 +920,7 @@ export default function FestivalManagementPage() {
                       e.stopPropagation()
                       handleStartEditDay(day)
                     }}
-                    className={`ml-2 p-1.5 rounded-md transition-all ${selectedDay === day.id
-                      ? 'text-white hover:bg-rose-700'
-                      : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
-                      } opacity-0 group-hover:opacity-100 ${selectedDay === day.id ? 'opacity-100' : ''}`}
+                    className={`ml-2 p-1.5 rounded-md transition-all text-retro-dark hover:bg-retro-cream opacity-0 group-hover:opacity-100 ${selectedDay === day.id ? 'opacity-100' : ''}`}
                     title="Edit day"
                   >
                     <svg
@@ -953,17 +947,17 @@ export default function FestivalManagementPage() {
         {/* Timetable Grid Panel - Full Width */}
         <div className="bg-white dark:bg-slate-800 p-6 rounded-lg border border-slate-200 dark:border-slate-700">
           {!selectedDay ? (
-            <p className="text-slate-600 dark:text-slate-400 text-center py-8">
+            <p className="text-retro-dark font-bold opacity-70 text-center py-8">
               Select a day to view the timetable
             </p>
           ) : currentStages.length === 0 ? (
             <div className="text-center py-8">
-              <p className="text-slate-600 dark:text-slate-400 mb-4">
+              <p className="text-retro-dark font-bold opacity-70 mb-4">
                 No stages yet. Add your first stage or import from CSV!
               </p>
               <button
                 onClick={() => handleAddStage(selectedDay)}
-                className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-medium transition-all"
+                className="px-4 py-2 bg-retro-orange text-white border-2 border-retro-dark font-black uppercase tracking-wider rounded-lg shadow-[2px_2px_0px_0px_rgba(26,44,50,1)] transition-all"
               >
                 + Add Stage
               </button>
@@ -972,19 +966,19 @@ export default function FestivalManagementPage() {
             <div className="overflow-x-auto">
               <div className="inline-block min-w-full">
                 {/* Timetable Grid */}
-                <div className="border-2 border-rose-300 dark:border-rose-700 rounded-lg overflow-hidden bg-rose-50 dark:bg-rose-950">
+                <div className="border-2 border-retro-dark rounded-lg overflow-hidden bg-retro-cream">
                   {/* Header with stage names */}
-                  <div className="grid bg-rose-200 dark:bg-rose-900/40" style={{ gridTemplateColumns: `80px repeat(${currentStages.length}, 1fr)` }}>
-                    <div className="p-3 font-bold text-rose-900 dark:text-rose-100 border-r-2 border-rose-300 dark:border-rose-700">
+                  <div className="grid bg-retro-blue" style={{ gridTemplateColumns: `80px repeat(${currentStages.length}, 1fr)` }}>
+                    <div className="p-3 font-black text-retro-dark border-r-2 border-retro-dark uppercase tracking-wider text-sm">
                       Time
                     </div>
                     {currentStages.map((stage) => (
                       <button
                         key={stage.id}
                         onClick={() => handleStartEditStage(stage)}
-                        className="p-2 font-bold text-rose-900 dark:text-rose-100 border-r-2 border-rose-300 dark:border-rose-700 last:border-r-0 hover:bg-rose-300/20 dark:hover:bg-rose-900/30 transition-all cursor-pointer"
+                        className="p-2 font-black text-retro-dark border-r-2 border-retro-dark last:border-r-0 hover:bg-retro-teal transition-all cursor-pointer"
                       >
-                        <span className="text-sm">{stage.name}</span>
+                        <span className="text-sm uppercase tracking-tight">{stage.name}</span>
                       </button>
                     ))}
                   </div>
@@ -999,11 +993,11 @@ export default function FestivalManagementPage() {
                       return (
                         <div
                           key={timeSlot}
-                          className="grid border-b border-slate-200 dark:border-slate-700 relative"
+                          className="grid border-b border-retro-dark/20 relative"
                           style={{ gridTemplateColumns: `80px repeat(${currentStages.length}, 1fr)`, minHeight: '24px' }}
                         >
                           {/* Time column */}
-                          <div className="p-1.5 text-xs font-medium text-rose-800 dark:text-rose-200 border-r-2 border-rose-300 dark:border-rose-700 bg-rose-100 dark:bg-rose-900/30">
+                          <div className="p-1.5 text-xs font-bold text-retro-dark border-r-2 border-retro-dark/30 bg-retro-cream">
                             {displayTime}
                           </div>
 
@@ -1020,7 +1014,7 @@ export default function FestivalManagementPage() {
                             return (
                               <div
                                 key={`${stage.id}-slot-${slotIndex}`}
-                                className="border-r-2 border-rose-300 dark:border-rose-700 last:border-r-0 bg-white dark:bg-rose-950/50 relative"
+                                className="border-r-2 border-retro-dark/20 last:border-r-0 bg-white relative"
                               >
                                 {setsStartingHere.map((set) => {
                                   const pos = getSetPosition(set)
@@ -1032,7 +1026,7 @@ export default function FestivalManagementPage() {
                                     <button
                                       key={set.id}
                                       onClick={() => handleStartEditSet(set)}
-                                      className="absolute left-1 right-1 top-0.5 bg-rose-200 dark:bg-rose-800 hover:bg-rose-300 dark:hover:bg-rose-700 border-2 border-rose-400 dark:border-rose-600 rounded-md text-left transition-all cursor-pointer z-10 shadow-sm overflow-hidden"
+                                      className="absolute left-1 right-1 top-0.5 bg-retro-orange/20 hover:bg-retro-orange/30 border-2 border-retro-orange rounded-md text-left transition-all cursor-pointer z-10 shadow-[2px_2px_0px_0px_rgba(26,44,50,0.3)] overflow-hidden"
                                       style={{
                                         height: `${heightPx}px`,
                                         minHeight: '32px',
@@ -1040,13 +1034,11 @@ export default function FestivalManagementPage() {
                                       }}
                                       title={`${set.artist_name}${set.end_time ? ` (${formatTime(set.start_time)} - ${formatTime(set.end_time)})` : ` (${formatTime(set.start_time)})`}`}
                                     >
-                                      <div className={`font-semibold text-rose-900 dark:text-rose-50 truncate leading-tight ${isVeryShort ? 'text-xs' : isShort ? 'text-xs' : 'text-sm'
-                                        }`}>
+                                      <div className={`font-black text-retro-dark truncate leading-tight ${isVeryShort ? 'text-xs' : isShort ? 'text-xs' : 'text-sm'}`}>
                                         {set.artist_name}
                                       </div>
                                       {!isVeryShort && (
-                                        <div className={`text-rose-700 dark:text-rose-300 truncate leading-tight ${isShort ? 'text-[10px] mt-0.5' : 'text-xs mt-0.5'
-                                          }`}>
+                                        <div className={`text-retro-dark/70 font-bold truncate leading-tight ${isShort ? 'text-[10px] mt-0.5' : 'text-xs mt-0.5'}`}>
                                           {formatTime(set.start_time)}
                                           {set.end_time && ` - ${formatTime(set.end_time)}`}
                                         </div>
@@ -1067,7 +1059,7 @@ export default function FestivalManagementPage() {
                 <div className="mt-4 flex justify-end">
                   <button
                     onClick={() => handleAddStage(selectedDay)}
-                    className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-medium transition-all"
+                    className="px-4 py-2 bg-retro-teal text-retro-dark border-2 border-retro-dark font-black uppercase tracking-wider rounded-lg shadow-[2px_2px_0px_0px_rgba(26,44,50,1)] transition-all"
                   >
                     + Add Stage
                   </button>
@@ -1078,129 +1070,133 @@ export default function FestivalManagementPage() {
         </div>
 
         {/* Edit Set Modal */}
-        {editingSet && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-xl p-6 md:p-8 w-full max-w-md">
-              <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-4">
-                Edit Set
-              </h2>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                    Artist Name *
-                  </label>
-                  <input
-                    type="text"
-                    value={editingSetArtist}
-                    onChange={(e) => setEditingSetArtist(e.target.value)}
-                    className="w-full px-4 py-2 border-2 border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-rose-500"
-                    autoFocus
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
+        {
+          editingSet && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+              <div className="bg-white rounded-xl border-2 border-retro-dark shadow-[8px_8px_0px_0px_rgba(26,44,50,1)] p-6 md:p-8 w-full max-w-md">
+                <h2 className="text-2xl font-black text-retro-dark mb-4 uppercase italic tracking-tight">
+                  Edit Set
+                </h2>
+                <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                      Start Time *
+                    <label className="block text-xs font-black text-retro-dark uppercase tracking-wider mb-2">
+                      Artist Name *
                     </label>
                     <input
-                      type="time"
-                      value={editingSetStart}
-                      onChange={(e) => setEditingSetStart(e.target.value)}
-                      className="w-full px-4 py-2 border-2 border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-rose-500"
+                      type="text"
+                      value={editingSetArtist}
+                      onChange={(e) => setEditingSetArtist(e.target.value)}
+                      className="w-full px-4 py-3 border-2 border-retro-dark rounded-lg bg-white text-retro-dark font-bold focus:shadow-[4px_4px_0px_0px_rgba(26,44,50,1)] focus:-translate-y-0.5 outline-none transition-all"
+                      autoFocus
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                      End Time
-                    </label>
-                    <input
-                      type="time"
-                      value={editingSetEnd}
-                      onChange={(e) => setEditingSetEnd(e.target.value)}
-                      className="w-full px-4 py-2 border-2 border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-rose-500"
-                    />
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-black text-retro-dark uppercase tracking-wider mb-2">
+                        Start Time *
+                      </label>
+                      <input
+                        type="time"
+                        value={editingSetStart}
+                        onChange={(e) => setEditingSetStart(e.target.value)}
+                        className="w-full px-4 py-3 border-2 border-retro-dark rounded-lg bg-white text-retro-dark font-bold focus:shadow-[4px_4px_0px_0px_rgba(26,44,50,1)] focus:-translate-y-0.5 outline-none transition-all"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-black text-retro-dark uppercase tracking-wider mb-2">
+                        End Time
+                      </label>
+                      <input
+                        type="time"
+                        value={editingSetEnd}
+                        onChange={(e) => setEditingSetEnd(e.target.value)}
+                        className="w-full px-4 py-3 border-2 border-retro-dark rounded-lg bg-white text-retro-dark font-bold focus:shadow-[4px_4px_0px_0px_rgba(26,44,50,1)] focus:-translate-y-0.5 outline-none transition-all"
+                      />
+                    </div>
                   </div>
-                </div>
-                <div className="flex gap-3">
-                  <button
-                    onClick={handleSaveSet}
-                    className="flex-1 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-semibold transition-all"
-                  >
-                    Save
-                  </button>
-                  <button
-                    onClick={handleCancelEditSet}
-                    className="flex-1 px-4 py-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-lg font-semibold transition-all"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={() => {
-                      if (confirm('Are you sure you want to delete this set?')) {
-                        handleDeleteSet(editingSet.id)
-                        handleCancelEditSet()
-                      }
-                    }}
-                    className="px-4 py-2 bg-red-200 dark:bg-red-900/30 hover:bg-red-300 dark:hover:bg-red-900/50 text-red-700 dark:text-red-400 rounded-lg font-semibold transition-all"
-                  >
-                    Delete
-                  </button>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={handleSaveSet}
+                      className="flex-1 px-4 py-3 bg-retro-teal text-retro-dark border-2 border-retro-dark font-black uppercase tracking-wider rounded-lg shadow-[2px_2px_0px_0px_rgba(26,44,50,1)] transition-all"
+                    >
+                      Save
+                    </button>
+                    <button
+                      onClick={handleCancelEditSet}
+                      className="flex-1 px-4 py-3 bg-white hover:bg-retro-cream text-retro-dark border-2 border-retro-dark font-bold rounded-lg transition-all"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (confirm('Are you sure you want to delete this set?')) {
+                          handleDeleteSet(editingSet.id)
+                          handleCancelEditSet()
+                        }
+                      }}
+                      className="px-4 py-3 bg-retro-orange text-white border-2 border-retro-dark font-black uppercase tracking-wider rounded-lg shadow-[2px_2px_0px_0px_rgba(26,44,50,1)] transition-all"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        )}
+          )
+        }
 
         {/* Edit Stage Modal */}
-        {editingStage && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-xl p-6 md:p-8 w-full max-w-md">
-              <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-4">
-                Edit Stage
-              </h2>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                    Stage Name *
-                  </label>
-                  <input
-                    type="text"
-                    value={editingStageName}
-                    onChange={(e) => setEditingStageName(e.target.value)}
-                    className="w-full px-4 py-2 border-2 border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-rose-500"
-                    autoFocus
-                  />
-                </div>
-                <div className="flex gap-3">
-                  <button
-                    onClick={handleSaveStage}
-                    className="flex-1 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-semibold transition-all"
-                  >
-                    Save
-                  </button>
-                  <button
-                    onClick={handleCancelEditStage}
-                    className="flex-1 px-4 py-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-lg font-semibold transition-all"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={() => {
-                      if (confirm('Are you sure? This will delete all sets on this stage.')) {
-                        handleDeleteStage(editingStage.id)
-                        handleCancelEditStage()
-                      }
-                    }}
-                    className="px-4 py-2 bg-red-200 dark:bg-red-900/30 hover:bg-red-300 dark:hover:bg-red-900/50 text-red-700 dark:text-red-400 rounded-lg font-semibold transition-all"
-                  >
-                    Delete
-                  </button>
+        {
+          editingStage && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+              <div className="bg-white rounded-xl border-2 border-retro-dark shadow-[8px_8px_0px_0px_rgba(26,44,50,1)] p-6 md:p-8 w-full max-w-md">
+                <h2 className="text-2xl font-black text-retro-dark mb-4 uppercase italic tracking-tight">
+                  Edit Stage
+                </h2>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-black text-retro-dark uppercase tracking-wider mb-2">
+                      Stage Name *
+                    </label>
+                    <input
+                      type="text"
+                      value={editingStageName}
+                      onChange={(e) => setEditingStageName(e.target.value)}
+                      className="w-full px-4 py-3 border-2 border-retro-dark rounded-lg bg-white text-retro-dark font-bold focus:shadow-[4px_4px_0px_0px_rgba(26,44,50,1)] focus:-translate-y-0.5 outline-none transition-all"
+                      autoFocus
+                    />
+                  </div>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={handleSaveStage}
+                      className="flex-1 px-4 py-3 bg-retro-teal text-retro-dark border-2 border-retro-dark font-black uppercase tracking-wider rounded-lg shadow-[2px_2px_0px_0px_rgba(26,44,50,1)] transition-all"
+                    >
+                      Save
+                    </button>
+                    <button
+                      onClick={handleCancelEditStage}
+                      className="flex-1 px-4 py-3 bg-white hover:bg-retro-cream text-retro-dark border-2 border-retro-dark font-bold rounded-lg transition-all"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (confirm('Are you sure? This will delete all sets on this stage.')) {
+                          handleDeleteStage(editingStage.id)
+                          handleCancelEditStage()
+                        }
+                      }}
+                      className="px-4 py-3 bg-retro-orange text-white border-2 border-retro-dark font-black uppercase tracking-wider rounded-lg shadow-[2px_2px_0px_0px_rgba(26,44,50,1)] transition-all"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        )}
-      </main>
-    </div>
+          )
+        }
+      </main >
+    </div >
   )
 }

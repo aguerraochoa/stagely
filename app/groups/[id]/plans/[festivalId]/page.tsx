@@ -176,29 +176,29 @@ export default function GroupPlannerPage({ params }: { params: Promise<{ id: str
             {/* Navigation */}
             <nav className="bg-white border-b-2 border-retro-dark">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between h-16 items-center">
-                        <div className="flex items-center gap-4">
-                            <Link href={`/groups/${resolvedParams.id}`} className="font-bold text-retro-dark hover:text-retro-orange uppercase tracking-tight">
-                                &larr; Back to Squad
+                    <div className="flex flex-wrap justify-between items-center py-3 gap-2">
+                        {/* Left side: Back + Title */}
+                        <div className="flex items-center gap-2 md:gap-4 min-w-0">
+                            <Link href={`/groups/${resolvedParams.id}`} className="font-bold text-retro-dark hover:text-retro-orange uppercase tracking-tight text-sm whitespace-nowrap">
+                                ← Back
                             </Link>
-                            <div className="h-6 w-0.5 bg-retro-dark"></div>
-                            <span className="font-black text-lg md:text-xl uppercase italic tracking-tighter text-retro-dark truncate max-w-[150px] md:max-w-none">{festival.name} Planner</span>
-
+                            <div className="h-4 md:h-6 w-0.5 bg-retro-dark"></div>
+                            <span className="font-black text-sm md:text-xl uppercase italic tracking-tighter text-retro-dark truncate">{festival.name}</span>
+                        </div>
+                        {/* Right side: Toggles */}
+                        <div className="flex gap-1 md:gap-2">
                             <Link
                                 href={`/festivals/${festival.id}`}
-                                className="ml-4 text-xs font-medium text-rose-600 dark:text-rose-400 hover:underline flex items-center gap-1"
+                                className="hidden md:flex px-3 py-1.5 text-xs font-bold text-retro-orange hover:text-retro-dark items-center gap-1"
                             >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                                 </svg>
-                                Edit My Choices
+                                Edit
                             </Link>
-                        </div>
-                        {/* View Toggles */}
-                        <div className="flex gap-2">
                             <button
                                 onClick={() => setActiveTab('macro')}
-                                className={`px-4 py-1.5 text-sm font-black uppercase tracking-wider border-2 border-retro-dark transition-all ${activeTab === 'macro'
+                                className={`px-3 md:px-4 py-1.5 text-xs md:text-sm font-black uppercase tracking-wider border-2 border-retro-dark transition-all ${activeTab === 'macro'
                                     ? 'bg-retro-orange text-white shadow-[2px_2px_0px_0px_rgba(26,44,50,1)] -translate-y-0.5'
                                     : 'bg-white text-retro-dark hover:bg-slate-50'
                                     }`}
@@ -207,7 +207,7 @@ export default function GroupPlannerPage({ params }: { params: Promise<{ id: str
                             </button>
                             <button
                                 onClick={() => setActiveTab('micro')}
-                                className={`px-4 py-1.5 text-sm font-black uppercase tracking-wider border-2 border-retro-dark transition-all ${activeTab === 'micro'
+                                className={`px-3 md:px-4 py-1.5 text-xs md:text-sm font-black uppercase tracking-wider border-2 border-retro-dark transition-all ${activeTab === 'micro'
                                     ? 'bg-retro-blue text-white shadow-[2px_2px_0px_0px_rgba(26,44,50,1)] -translate-y-0.5'
                                     : 'bg-white text-retro-dark hover:bg-slate-50'
                                     }`}
@@ -227,9 +227,9 @@ export default function GroupPlannerPage({ params }: { params: Promise<{ id: str
                             <button
                                 key={day.id}
                                 onClick={() => setSelectedDay(day.id)}
-                                className={`flex-shrink-0 px-6 py-2 text-sm font-black uppercase tracking-wider border-2 border-retro-dark transition-all ${selectedDay === day.id
-                                    ? 'bg-retro-teal text-retro-dark shadow-[4px_4px_0px_0px_rgba(26,44,50,1)] -translate-y-1'
-                                    : 'bg-white text-retro-dark hover:bg-slate-50'
+                                className={`flex-shrink-0 px-6 py-3 text-sm font-black uppercase tracking-wider border-2 border-retro-dark shadow-[4px_4px_0px_0px_rgba(26,44,50,1)] transition-all ${selectedDay === day.id
+                                    ? 'bg-retro-teal text-retro-dark -translate-y-1 shadow-[6px_6px_0px_0px_rgba(26,44,50,1)]'
+                                    : 'bg-white text-retro-dark hover:bg-retro-cream hover:-translate-y-0.5'
                                     }`}
                             >
                                 {day.day_name}

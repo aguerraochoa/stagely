@@ -44,26 +44,26 @@ export default function AdminPage() {
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-rose-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-retro-orange"></div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
-      <nav className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
+    <div className="min-h-screen bg-retro-cream text-retro-dark">
+      <nav className="bg-white border-b-2 border-retro-dark">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             <div className="flex items-center gap-4">
-              <Link href="/" className="text-2xl font-bold bg-gradient-to-r from-rose-600 to-rose-800 dark:from-rose-400 dark:to-rose-600 bg-clip-text text-transparent">
+              <Link href="/" className="text-2xl font-black uppercase italic tracking-tighter text-retro-dark">
                 Stagely
               </Link>
-              <span className="text-slate-400">/</span>
-              <span className="text-slate-600 dark:text-slate-400">Admin</span>
+              <div className="h-6 w-0.5 bg-retro-dark"></div>
+              <span className="text-retro-dark font-bold uppercase tracking-wider text-xs">Admin</span>
             </div>
             <Link
               href="/"
-              className="px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100"
+              className="px-4 py-2 text-sm font-black uppercase tracking-wider text-retro-dark hover:text-retro-orange transition-colors"
             >
               Back to Home
             </Link>
@@ -72,26 +72,29 @@ export default function AdminPage() {
       </nav>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">
+        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-6 mb-8">
+          <h1 className="text-3xl md:text-4xl font-black text-retro-dark uppercase italic tracking-tighter">
             Festival Management
           </h1>
           <Link
             href="/admin/festivals/new"
-            className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-semibold shadow-md hover:shadow-lg transition-all"
+            className="text-center px-6 py-3 bg-retro-orange text-white border-2 border-retro-dark font-black uppercase tracking-wider shadow-[4px_4px_0px_0px_rgba(26,44,50,1)] hover:shadow-[6px_6px_0px_0px_rgba(26,44,50,1)] hover:-translate-y-0.5 transition-all"
           >
             + Create Festival
           </Link>
         </div>
 
         {festivals.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-slate-600 dark:text-slate-400 mb-4">
+          <div className="bg-white border-2 border-retro-dark shadow-[8px_8px_0px_0px_rgba(26,44,50,1)] rounded-xl p-12 text-center">
+            <div className="w-16 h-16 bg-retro-cream border-2 border-retro-dark rounded-full flex items-center justify-center mx-auto mb-4">
+              <span className="text-2xl">🎤</span>
+            </div>
+            <p className="text-retro-dark font-bold mb-8">
               No festivals yet. Create your first one!
             </p>
             <Link
               href="/admin/festivals/new"
-              className="inline-block px-6 py-3 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-semibold shadow-md hover:shadow-lg transition-all"
+              className="inline-block px-8 py-4 bg-retro-orange text-white border-2 border-retro-dark font-black uppercase tracking-wider shadow-[4px_4px_0px_0px_rgba(26,44,50,1)] hover:shadow-[6px_6px_0px_0px_rgba(26,44,50,1)] hover:-translate-y-0.5 transition-all"
             >
               Create Festival
             </Link>
@@ -102,12 +105,12 @@ export default function AdminPage() {
               <Link
                 key={festival.id}
                 href={`/admin/festivals/${festival.id}`}
-                className="p-6 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 hover:border-rose-500 dark:hover:border-rose-400 transition-colors"
+                className="p-6 bg-white rounded-xl border-2 border-retro-dark shadow-[4px_4px_0px_0px_rgba(26,44,50,1)] hover:shadow-[6px_6px_0px_0px_rgba(26,44,50,1)] hover:-translate-y-1 transition-all"
               >
-                <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-2">
+                <h3 className="text-xl font-black text-retro-dark mb-2 uppercase italic tracking-tight">
                   {festival.name}
                 </h3>
-                <p className="text-slate-600 dark:text-slate-400">
+                <p className="text-retro-dark font-bold opacity-70">
                   {festival.year}
                 </p>
               </Link>

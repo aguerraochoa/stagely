@@ -281,7 +281,7 @@ export default function FestivalDetailPage({ params }: { params: Promise<{ id: s
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-rose-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-retro-orange"></div>
       </div>
     )
   }
@@ -333,9 +333,9 @@ export default function FestivalDetailPage({ params }: { params: Promise<{ id: s
               <button
                 key={day.id}
                 onClick={() => setSelectedDay(day.id)}
-                className={`flex-shrink-0 px-6 py-2 text-sm font-black uppercase tracking-wider border-2 border-retro-dark transition-all ${selectedDay === day.id
-                  ? 'bg-retro-teal text-retro-dark shadow-[4px_4px_0px_0px_rgba(26,44,50,1)] -translate-y-1'
-                  : 'bg-white text-retro-dark hover:bg-slate-50'
+                className={`flex-shrink-0 px-6 py-3 text-sm font-black uppercase tracking-wider border-2 border-retro-dark shadow-[4px_4px_0px_0px_rgba(26,44,50,1)] transition-all ${selectedDay === day.id
+                  ? 'bg-retro-teal text-retro-dark -translate-y-1 shadow-[6px_6px_0px_0px_rgba(26,44,50,1)]'
+                  : 'bg-white text-retro-dark hover:bg-retro-cream hover:-translate-y-0.5'
                   }`}
               >
                 {day.day_name}

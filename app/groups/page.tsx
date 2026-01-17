@@ -68,7 +68,7 @@ export default function GroupsPage() {
     if (loading) {
         return (
             <div className="flex min-h-screen items-center justify-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-rose-600"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-retro-orange"></div>
             </div>
         )
     }
@@ -96,27 +96,27 @@ export default function GroupsPage() {
             </nav>
 
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <div className="flex justify-between items-center mb-12">
+                <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-6 mb-12">
                     <div>
-                        <h1 className="text-5xl font-black text-retro-dark mb-2 uppercase italic tracking-tighter">
+                        <h1 className="text-3xl md:text-5xl font-black text-retro-dark mb-2 uppercase italic tracking-tighter">
                             My Squads
                         </h1>
                         <p className="text-retro-dark font-bold opacity-70">
                             Manage your festival groups
                         </p>
                     </div>
-                    <div className="flex gap-4">
+                    <div className="flex gap-3 md:gap-4">
                         <Link
                             href="/groups/join"
-                            className="px-6 py-3 bg-white border-2 border-retro-dark text-retro-dark font-black uppercase tracking-wider hover:bg-retro-cream shadow-[2px_2px_0px_0px_rgba(26,44,50,1)] hover:shadow-[4px_4px_0px_0px_rgba(26,44,50,1)] hover:-translate-y-0.5 transition-all"
+                            className="flex-1 md:flex-none text-center px-4 md:px-6 py-3 bg-white border-2 border-retro-dark text-retro-dark font-black uppercase tracking-wider text-sm hover:bg-retro-cream shadow-[2px_2px_0px_0px_rgba(26,44,50,1)] hover:shadow-[4px_4px_0px_0px_rgba(26,44,50,1)] hover:-translate-y-0.5 transition-all"
                         >
-                            Join w/ Code
+                            Join
                         </Link>
                         <Link
                             href="/groups/new"
-                            className="px-6 py-3 bg-retro-orange text-white border-2 border-retro-dark font-black uppercase tracking-wider shadow-[2px_2px_0px_0px_rgba(26,44,50,1)] hover:shadow-[4px_4px_0px_0px_rgba(26,44,50,1)] hover:-translate-y-0.5 transition-all"
+                            className="flex-1 md:flex-none text-center px-4 md:px-6 py-3 bg-retro-orange text-white border-2 border-retro-dark font-black uppercase tracking-wider text-sm shadow-[2px_2px_0px_0px_rgba(26,44,50,1)] hover:shadow-[4px_4px_0px_0px_rgba(26,44,50,1)] hover:-translate-y-0.5 transition-all"
                         >
-                            + Create Squad
+                            + New Squad
                         </Link>
                     </div>
                 </div>

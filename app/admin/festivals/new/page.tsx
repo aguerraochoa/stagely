@@ -48,39 +48,39 @@ export default function NewFestivalPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
-      <nav className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
+    <div className="min-h-screen bg-retro-cream text-retro-dark">
+      <nav className="bg-white border-b-2 border-retro-dark">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             <div className="flex items-center gap-4">
-              <Link href="/" className="text-2xl font-bold bg-gradient-to-r from-rose-600 to-rose-800 dark:from-rose-400 dark:to-rose-600 bg-clip-text text-transparent">
+              <Link href="/" className="text-2xl font-black uppercase italic tracking-tighter text-retro-dark">
                 Stagely
               </Link>
-              <span className="text-slate-400">/</span>
-              <Link href="/admin" className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100">
+              <div className="h-6 w-0.5 bg-retro-dark"></div>
+              <Link href="/admin" className="text-retro-dark font-bold uppercase tracking-wider text-xs hover:text-retro-orange">
                 Admin
               </Link>
-              <span className="text-slate-400">/</span>
-              <span className="text-slate-600 dark:text-slate-400">New Festival</span>
+              <span className="text-retro-dark/50 font-bold">/</span>
+              <span className="text-retro-dark font-bold uppercase tracking-wider text-xs">New Festival</span>
             </div>
           </div>
         </div>
       </nav>
 
       <main className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-6">
+        <h1 className="text-3xl font-black text-retro-dark mb-6 uppercase italic tracking-tighter">
           Create New Festival
         </h1>
 
-        <form onSubmit={handleSubmit} className="space-y-6 bg-white dark:bg-slate-800 p-6 rounded-lg border border-slate-200 dark:border-slate-700">
+        <form onSubmit={handleSubmit} className="bg-white border-2 border-retro-dark shadow-[8px_8px_0px_0px_rgba(26,44,50,1)] rounded-xl p-8 space-y-6">
           {error && (
-            <div className="p-3 rounded-lg bg-red-50 text-red-800 dark:bg-red-900/20 dark:text-red-400">
+            <div className="p-3 rounded-lg bg-retro-orange text-white font-bold border-2 border-retro-dark">
               {error}
             </div>
           )}
 
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+            <label htmlFor="name" className="block text-xs font-black text-retro-dark uppercase tracking-wider mb-2">
               Festival Name *
             </label>
             <input
@@ -90,13 +90,13 @@ export default function NewFestivalPage() {
               onChange={(e) => setName(e.target.value)}
               required
               disabled={loading}
-              className="w-full px-4 py-2 border-2 border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full px-4 py-3 border-2 border-retro-dark rounded-lg bg-white text-retro-dark font-bold focus:shadow-[4px_4px_0px_0px_rgba(26,44,50,1)] focus:-translate-y-0.5 outline-none transition-all placeholder-retro-dark/30 disabled:opacity-50"
               placeholder="e.g., Coachella, Lollapalooza, Tecate Pa'l Norte"
             />
           </div>
 
           <div>
-            <label htmlFor="year" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+            <label htmlFor="year" className="block text-xs font-black text-retro-dark uppercase tracking-wider mb-2">
               Year *
             </label>
             <input
@@ -108,7 +108,7 @@ export default function NewFestivalPage() {
               disabled={loading}
               min="2020"
               max="2100"
-              className="w-full px-4 py-2 border-2 border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full px-4 py-3 border-2 border-retro-dark rounded-lg bg-white text-retro-dark font-bold focus:shadow-[4px_4px_0px_0px_rgba(26,44,50,1)] focus:-translate-y-0.5 outline-none transition-all placeholder-retro-dark/30 disabled:opacity-50"
             />
           </div>
 
@@ -116,13 +116,13 @@ export default function NewFestivalPage() {
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-semibold shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              className="flex-1 px-4 py-3 bg-retro-orange hover:bg-retro-dark text-white border-2 border-retro-dark font-black uppercase tracking-wider rounded-lg shadow-[4px_4px_0px_0px_rgba(26,44,50,1)] hover:shadow-[6px_6px_0px_0px_rgba(26,44,50,1)] hover:-translate-y-0.5 transition-all disabled:opacity-50"
             >
               {loading ? 'Creating...' : 'Create Festival'}
             </button>
             <Link
               href="/admin"
-              className="px-4 py-2 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg font-semibold hover:bg-slate-300 dark:hover:bg-slate-600 transition-all"
+              className="px-6 py-3 bg-white hover:bg-retro-cream text-retro-dark border-2 border-retro-dark font-black uppercase tracking-wider rounded-lg transition-all"
             >
               Cancel
             </Link>

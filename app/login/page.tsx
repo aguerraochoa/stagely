@@ -26,7 +26,7 @@ export default function LoginPage() {
     const details = urlParams.get('details')
     const verified = urlParams.get('verified')
     const reset = urlParams.get('reset')
-    
+
     if (error === 'auth_failed') {
       setMessage(
         details
@@ -56,14 +56,14 @@ export default function LoginPage() {
   useEffect(() => {
     const checkUser = async () => {
       await new Promise(resolve => setTimeout(resolve, 100))
-      
+
       const {
         data: { user },
       } = await supabase.auth.getUser()
       if (user) {
         const urlParams = new URLSearchParams(window.location.search)
         const nextUrl = urlParams.get('next') || '/'
-        
+
         if (urlParams.get('verified') === 'true') {
           setTimeout(() => {
             router.push(nextUrl)
@@ -82,22 +82,22 @@ export default function LoginPage() {
     if (pwd.length < 8) {
       return 'Password must be at least 8 characters'
     }
-    
+
     const hasLowercase = /[a-z]/.test(pwd)
     const hasUppercase = /[A-Z]/.test(pwd)
     const hasDigit = /[0-9]/.test(pwd)
     const hasSymbol = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(pwd)
-    
+
     const missing = []
     if (!hasLowercase) missing.push('lowercase letter')
     if (!hasUppercase) missing.push('uppercase letter')
     if (!hasDigit) missing.push('digit')
     if (!hasSymbol) missing.push('symbol')
-    
+
     if (missing.length > 0) {
       return `Password must include at least one ${missing.join(', ')}`
     }
-    
+
     return null
   }
 
@@ -255,20 +255,20 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center p-8 bg-slate-50 dark:bg-slate-900">
-      <div className="w-full max-w-md space-y-8">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-rose-600 to-rose-800 dark:from-rose-400 dark:to-rose-600 bg-clip-text text-transparent">
+    <div className="flex min-h-screen flex-col items-center justify-center p-8 bg-retro-cream text-retro-dark">
+      <div className="w-full max-w-md">
+        <div className="text-center mb-10">
+          <h1 className="text-6xl font-black mb-2 text-retro-dark uppercase italic tracking-tighter">
             Stagely
           </h1>
-          <p className="text-slate-600 dark:text-slate-400">
+          <p className="text-retro-dark font-bold text-lg opacity-70">
             Plan your festival day with friends
           </p>
         </div>
 
-        <div className="mt-8 space-y-6">
+        <div className="bg-white border-2 border-retro-dark shadow-[8px_8px_0px_0px_rgba(26,44,50,1)] rounded-xl p-8 space-y-6">
           {/* Toggle between sign in and sign up */}
-          <div className="flex gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-lg">
+          <div className="flex gap-2 p-1.5 bg-retro-cream border-2 border-retro-dark rounded-lg">
             <button
               type="button"
               onClick={() => {
@@ -280,11 +280,10 @@ export default function LoginPage() {
                 setPassword('')
                 setConfirmPassword('')
               }}
-              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
-                mode === 'signin'
-                  ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-              }`}
+              className={`flex-1 py-2 px-4 rounded-md text-sm font-black uppercase tracking-wider transition-all ${mode === 'signin'
+                ? 'bg-retro-teal text-retro-dark border-2 border-retro-dark shadow-[2px_2px_0px_0px_rgba(26,44,50,1)] -translate-y-0.5'
+                : 'text-retro-dark font-bold hover:bg-black/5'
+                }`}
             >
               Sign In
             </button>
@@ -299,11 +298,10 @@ export default function LoginPage() {
                 setPassword('')
                 setConfirmPassword('')
               }}
-              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
-                mode === 'signup'
-                  ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-              }`}
+              className={`flex-1 py-2 px-4 rounded-md text-sm font-black uppercase tracking-wider transition-all ${mode === 'signup'
+                ? 'bg-retro-teal text-retro-dark border-2 border-retro-dark shadow-[2px_2px_0px_0px_rgba(26,44,50,1)] -translate-y-0.5'
+                : 'text-retro-dark font-bold hover:bg-black/5'
+                }`}
             >
               Sign Up
             </button>
@@ -315,7 +313,7 @@ export default function LoginPage() {
             className="space-y-4"
           >
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+              <label htmlFor="email" className="block text-xs font-black text-retro-dark uppercase tracking-wider mb-2">
                 Email
               </label>
               <input
@@ -325,7 +323,7 @@ export default function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 disabled={loading}
-                className="w-full px-4 py-2 border-2 border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full px-4 py-3 border-2 border-retro-dark rounded-lg bg-white text-retro-dark font-bold focus:shadow-[4px_4px_0px_0px_rgba(26,44,50,1)] focus:-translate-y-0.5 outline-none transition-all placeholder-retro-dark/30 disabled:opacity-50"
                 placeholder="you@example.com"
               />
             </div>
@@ -333,7 +331,7 @@ export default function LoginPage() {
             {mode === 'signup' && (
               <>
                 <div>
-                  <label htmlFor="username" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                  <label htmlFor="username" className="block text-xs font-black text-retro-dark uppercase tracking-wider mb-2">
                     Username
                   </label>
                   <input
@@ -346,16 +344,16 @@ export default function LoginPage() {
                     minLength={3}
                     maxLength={20}
                     pattern="[a-zA-Z0-9_-]+"
-                    className="w-full px-4 py-2 border-2 border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full px-4 py-3 border-2 border-retro-dark rounded-lg bg-white text-retro-dark font-bold focus:shadow-[4px_4px_0px_0px_rgba(26,44,50,1)] focus:-translate-y-0.5 outline-none transition-all placeholder-retro-dark/30 disabled:opacity-50"
                     placeholder="yourusername"
                   />
-                  <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                  <p className="mt-1 text-[10px] font-bold text-retro-dark/60">
                     3-20 characters, letters, numbers, _, -
                   </p>
                 </div>
                 <div>
-                  <label htmlFor="displayName" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                    Display Name <span className="text-slate-400">(optional)</span>
+                  <label htmlFor="displayName" className="block text-xs font-black text-retro-dark uppercase tracking-wider mb-2">
+                    Display Name <span className="text-retro-dark/50 font-medium normal-case tracking-normal">(optional)</span>
                   </label>
                   <input
                     id="displayName"
@@ -363,7 +361,7 @@ export default function LoginPage() {
                     value={displayName}
                     onChange={(e) => setDisplayName(e.target.value)}
                     disabled={loading}
-                    className="w-full px-4 py-2 border-2 border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full px-4 py-3 border-2 border-retro-dark rounded-lg bg-white text-retro-dark font-bold focus:shadow-[4px_4px_0px_0px_rgba(26,44,50,1)] focus:-translate-y-0.5 outline-none transition-all placeholder-retro-dark/30 disabled:opacity-50"
                     placeholder="Your Name"
                   />
                 </div>
@@ -371,8 +369,8 @@ export default function LoginPage() {
             )}
 
             <div>
-              <div className="flex items-center justify-between mb-1">
-                <label htmlFor="password" className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+              <div className="flex items-center justify-between mb-2">
+                <label htmlFor="password" className="block text-xs font-black text-retro-dark uppercase tracking-wider">
                   Password
                 </label>
                 {mode === 'signin' && (
@@ -382,7 +380,7 @@ export default function LoginPage() {
                       setShowForgotPassword(true)
                       setResetEmail(email)
                     }}
-                    className="text-xs text-rose-600 hover:text-rose-700 dark:text-rose-400 dark:hover:text-rose-300 font-medium"
+                    className="text-xs font-bold text-retro-orange hover:text-retro-dark hover:underline"
                   >
                     Forgot password?
                   </button>
@@ -396,11 +394,11 @@ export default function LoginPage() {
                 required
                 disabled={loading}
                 minLength={8}
-                className="w-full px-4 py-2 border-2 border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full px-4 py-3 border-2 border-retro-dark rounded-lg bg-white text-retro-dark font-bold focus:shadow-[4px_4px_0px_0px_rgba(26,44,50,1)] focus:-translate-y-0.5 outline-none transition-all placeholder-retro-dark/30 disabled:opacity-50"
                 placeholder={mode === 'signup' ? 'At least 8 characters' : 'Enter your password'}
               />
               {mode === 'signup' && (
-                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                <p className="mt-1 text-[10px] font-bold text-retro-dark/60">
                   Must include: uppercase, lowercase, digit, and symbol
                 </p>
               )}
@@ -408,7 +406,7 @@ export default function LoginPage() {
 
             {mode === 'signup' && (
               <div>
-                <label htmlFor="confirmPassword" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                <label htmlFor="confirmPassword" className="block text-xs font-black text-retro-dark uppercase tracking-wider mb-2">
                   Confirm Password
                 </label>
                 <input
@@ -419,7 +417,7 @@ export default function LoginPage() {
                   required
                   disabled={loading}
                   minLength={8}
-                  className="w-full px-4 py-2 border-2 border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full px-4 py-3 border-2 border-retro-dark rounded-lg bg-white text-retro-dark font-bold focus:shadow-[4px_4px_0px_0px_rgba(26,44,50,1)] focus:-translate-y-0.5 outline-none transition-all placeholder-retro-dark/30 disabled:opacity-50"
                   placeholder="Confirm your password"
                 />
               </div>
@@ -428,7 +426,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 px-4 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-semibold shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              className="w-full py-4 px-4 bg-retro-orange hover:bg-retro-dark text-white border-2 border-retro-dark font-black uppercase tracking-wider rounded-lg shadow-[4px_4px_0px_0px_rgba(26,44,50,1)] hover:shadow-[6px_6px_0px_0px_rgba(26,44,50,1)] hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
@@ -445,12 +443,12 @@ export default function LoginPage() {
           </form>
 
           {/* Divider */}
-          <div className="relative">
+          <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-slate-300 dark:border-slate-600"></div>
+              <div className="w-full border-t-2 border-retro-dark/20"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-slate-50 dark:bg-slate-900 text-slate-500 dark:text-slate-400">Or</span>
+              <span className="px-2 bg-white text-retro-dark font-black uppercase tracking-wider">Or</span>
             </div>
           </div>
 
@@ -458,7 +456,7 @@ export default function LoginPage() {
           <button
             onClick={handleGoogleLogin}
             disabled={loading}
-            className="w-full flex items-center justify-center gap-3 py-3 px-4 border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-md hover:shadow-lg text-sm font-semibold bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            className="w-full flex items-center justify-center gap-3 py-3 px-4 border-2 border-retro-dark rounded-xl font-bold bg-white text-retro-dark shadow-[4px_4px_0px_0px_rgba(26,44,50,1)] hover:shadow-[6px_6px_0px_0px_rgba(26,44,50,1)] hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
             {loading ? (
               <>
@@ -495,101 +493,101 @@ export default function LoginPage() {
 
           {message && (
             <div
-              className={`p-3 rounded-lg text-sm ${
-                message.includes('failed') || message.includes('error') || message.includes('not match') || message.includes('at least') || message.includes('must')
-                  ? 'bg-red-50 text-red-800 dark:bg-red-900/20 dark:text-red-400'
-                  : message.includes('Check your email') || message.includes('verify')
-                  ? 'bg-blue-50 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
-                  : 'bg-rose-50 text-rose-800 dark:bg-rose-900/20 dark:text-rose-400'
-              }`}
+              className={`p-3 rounded-lg text-sm font-bold border-2 border-retro-dark ${message.includes('failed') || message.includes('error') || message.includes('not match') || message.includes('at least') || message.includes('must')
+                ? 'bg-retro-orange text-white'
+                : message.includes('Check your email') || message.includes('verify')
+                  ? 'bg-retro-teal text-retro-dark'
+                  : 'bg-retro-cream text-retro-dark'
+                }`}
             >
               {message}
             </div>
           )}
 
-          <p className="text-xs text-center text-slate-500 dark:text-slate-400">
+          <p className="text-[10px] text-center text-retro-dark/50 font-bold uppercase tracking-wider">
             By signing in, you agree to Stagely&apos;s terms of service
           </p>
         </div>
       </div>
-
       {/* Forgot Password Modal */}
-      {showForgotPassword && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-xl p-6 md:p-8 w-full max-w-md">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
-                Reset Password
-              </h2>
-              <button
-                onClick={() => {
-                  setShowForgotPassword(false)
-                  setResetEmail('')
-                  setMessage('')
-                }}
-                className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            
-            <p className="text-slate-600 dark:text-slate-400 mb-6">
-              Enter your email address and we&apos;ll send you a link to reset your password.
-            </p>
-
-            <form onSubmit={handleForgotPassword} className="space-y-4">
-              <div>
-                <label htmlFor="resetEmail" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                  Email
-                </label>
-                <input
-                  id="resetEmail"
-                  type="email"
-                  value={resetEmail}
-                  onChange={(e) => setResetEmail(e.target.value)}
-                  required
-                  disabled={resetLoading}
-                  className="w-full px-4 py-2 border-2 border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
-                  placeholder="you@example.com"
-                />
-              </div>
-
-              <div className="flex gap-3">
+      {
+        showForgotPassword && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-xl p-6 md:p-8 w-full max-w-md">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+                  Reset Password
+                </h2>
                 <button
-                  type="submit"
-                  disabled={resetLoading}
-                  className="flex-1 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-semibold shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                >
-                  {resetLoading ? (
-                    <span className="flex items-center justify-center gap-2">
-                      <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Sending...
-                    </span>
-                  ) : (
-                    'Send Reset Link'
-                  )}
-                </button>
-                <button
-                  type="button"
                   onClick={() => {
                     setShowForgotPassword(false)
                     setResetEmail('')
                     setMessage('')
                   }}
-                  className="px-4 py-2 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg font-semibold hover:bg-slate-300 dark:hover:bg-slate-600 transition-all"
+                  className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
                 >
-                  Cancel
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
                 </button>
               </div>
-            </form>
+
+              <p className="text-slate-600 dark:text-slate-400 mb-6">
+                Enter your email address and we&apos;ll send you a link to reset your password.
+              </p>
+
+              <form onSubmit={handleForgotPassword} className="space-y-4">
+                <div>
+                  <label htmlFor="resetEmail" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                    Email
+                  </label>
+                  <input
+                    id="resetEmail"
+                    type="email"
+                    value={resetEmail}
+                    onChange={(e) => setResetEmail(e.target.value)}
+                    required
+                    disabled={resetLoading}
+                    className="w-full px-4 py-2 border-2 border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+                    placeholder="you@example.com"
+                  />
+                </div>
+
+                <div className="flex gap-3">
+                  <button
+                    type="submit"
+                    disabled={resetLoading}
+                    className="flex-1 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-semibold shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                  >
+                    {resetLoading ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Sending...
+                      </span>
+                    ) : (
+                      'Send Reset Link'
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowForgotPassword(false)
+                      setResetEmail('')
+                      setMessage('')
+                    }}
+                    className="px-4 py-2 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg font-semibold hover:bg-slate-300 dark:hover:bg-slate-600 transition-all"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
-        </div>
-      )}
+        )
+      }
     </div>
   )
 }

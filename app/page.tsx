@@ -115,7 +115,7 @@ export default function Home() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="text-center space-y-4">
-          <h2 className="text-5xl font-black text-retro-dark uppercase italic tracking-tighter mb-2">
+          <h2 className="text-3xl md:text-5xl font-black text-retro-dark uppercase italic tracking-tighter mb-2">
             Welcome to Stagely
           </h2>
           <p className="text-retro-dark font-bold text-lg opacity-70">

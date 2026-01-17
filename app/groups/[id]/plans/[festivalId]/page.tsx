@@ -182,7 +182,7 @@ export default function GroupPlannerPage({ params }: { params: Promise<{ id: str
                                 &larr; Back to Squad
                             </Link>
                             <div className="h-6 w-0.5 bg-retro-dark"></div>
-                            <span className="font-black text-xl uppercase italic tracking-tighter text-retro-dark">{festival.name} Planner</span>
+                            <span className="font-black text-lg md:text-xl uppercase italic tracking-tighter text-retro-dark truncate max-w-[150px] md:max-w-none">{festival.name} Planner</span>
 
                             <Link
                                 href={`/festivals/${festival.id}`}
@@ -517,7 +517,7 @@ function MicroView({ members, stages, sets, selections, loading }: {
                             </div>
 
                             {/* Cards Container */}
-                            <div className={`w-full flex ${isSplit ? 'justify-between gap-4' : 'justify-center'}`}>
+                            <div className={`w-full flex ${isSplit ? 'justify-between gap-2 md:gap-4' : 'justify-center'}`}>
                                 {block!.winners.map((item, w_idx) => {
                                     const stageName = stages.find(s => s.id === item.set.stage_id)?.name;
 
@@ -538,8 +538,8 @@ function MicroView({ members, stages, sets, selections, loading }: {
                                         <div key={item.set.id}
                                             className={`
                                                 relative flex-1 ${cardBg}
-                                                border-2 border-retro-dark shadow-[6px_6px_0px_0px_rgba(26,44,50,1)]
-                                                rounded-lg p-5
+                                                border-2 border-retro-dark shadow-[4px_4px_0px_0px_rgba(26,44,50,1)] md:shadow-[6px_6px_0px_0px_rgba(26,44,50,1)]
+                                                rounded-lg p-3 md:p-5
                                                 transition-all hover:-translate-y-1 hover:shadow-[8px_8px_0px_0px_rgba(26,44,50,1)] duration-200
                                                 ${!isSplit ? 'max-w-md' : ''}
                                             `}
@@ -559,20 +559,20 @@ function MicroView({ members, stages, sets, selections, loading }: {
                                             </div>
 
                                             {/* Artist */}
-                                            <div className="text-2xl font-black text-retro-dark mb-4 uppercase italic tracking-tight leading-none">
+                                            <div className="text-lg md:text-2xl font-black text-retro-dark mb-2 md:mb-4 uppercase italic tracking-tight leading-none break-words">
                                                 {item.set.artist_name}
                                             </div>
 
                                             {/* Footer: Time Range & Faces */}
-                                            <div className="flex justify-between items-end pt-1">
-                                                <div className="text-xs font-mono font-bold text-retro-dark bg-retro-blue/10 px-2 py-1 rounded border border-retro-dark/20">
+                                            <div className="flex flex-col md:flex-row justify-between items-start md:items-end pt-1 gap-2 md:gap-0">
+                                                <div className="text-[10px] md:text-xs font-mono font-bold text-retro-dark bg-retro-blue/10 px-2 py-1 rounded border border-retro-dark/20 whitespace-nowrap">
                                                     {formatTime(item.set.start_time)} - {formatTime(item.set.end_time || '')}
                                                 </div>
 
                                                 {/* Avatar Pile */}
-                                                <div className="flex -space-x-2">
+                                                <div className="flex -space-x-1 md:-space-x-2">
                                                     {interestedMembers.slice(0, 4).map((m, i) => (
-                                                        <div key={i} className={`w-8 h-8 rounded-full border-2 border-retro-dark flex items-center justify-center text-[10px] font-black text-white shadow-sm overflow-hidden
+                                                        <div key={i} className={`w-6 h-6 md:w-8 md:h-8 rounded-full border-2 border-retro-dark flex items-center justify-center text-[8px] md:text-[10px] font-black text-white shadow-sm overflow-hidden
                                                             ${setVotes.find(v => v.user_id === m.id)?.priority === 'green' ? 'bg-retro-teal text-retro-dark' : 'bg-retro-orange'}
                                                             `}
                                                             title={m.username || 'Member'}
@@ -585,7 +585,7 @@ function MicroView({ members, stages, sets, selections, loading }: {
                                                         </div>
                                                     ))}
                                                     {interestedMembers.length > 4 && (
-                                                        <div className="w-8 h-8 rounded-full bg-white border-2 border-retro-dark flex items-center justify-center text-[10px] font-black text-retro-dark">
+                                                        <div className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-white border-2 border-retro-dark flex items-center justify-center text-[8px] md:text-[10px] font-black text-retro-dark">
                                                             +{interestedMembers.length - 4}
                                                         </div>
                                                     )}

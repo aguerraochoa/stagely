@@ -318,7 +318,7 @@ export default function FestivalDetailPage({ params }: { params: Promise<{ id: s
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 className="text-5xl font-black text-retro-dark mb-2 uppercase italic tracking-tighter">
+          <h1 className="text-3xl md:text-5xl font-black text-retro-dark mb-2 uppercase italic tracking-tighter">
             {festival.name} {festival.year}
           </h1>
           <p className="text-retro-dark font-bold opacity-70">

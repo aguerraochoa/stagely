@@ -17,7 +17,8 @@ export const metadata: Metadata = {
   description: "Plan your music festival day with friends using the familiar festival timetable grid",
   icons: {
     icon: "/icon.png",
-    apple: "/apple-icon.png",
+    shortcut: "/icon.png",
+    apple: "/icon.png",
   },
   manifest: "/manifest.json",
 };
@@ -27,7 +28,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: "#FFFDF5",
+  themeColor: "#FFFFFF",
 };
 
 export default function RootLayout({

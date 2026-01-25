@@ -61,6 +61,7 @@ export default function GroupPlannerPage({ params }: { params: Promise<{ id: str
     const [stages, setStages] = useState<Stage[]>([])
     const [sets, setSets] = useState<Set[]>([])
     const [groupSelections, setGroupSelections] = useState<GroupSelection[]>([])
+    const [currentUserId, setCurrentUserId] = useState<string | null>(null)
 
     const router = useRouter()
     const supabase = createClient()
@@ -69,6 +70,10 @@ export default function GroupPlannerPage({ params }: { params: Promise<{ id: str
     useEffect(() => {
         const init = async () => {
             try {
+                // Get Current User
+                const { data: { user } } = await supabase.auth.getUser()
+                if (user) setCurrentUserId(user.id)
+
                 // Fetch Festival
                 const { data: festivalData, error: festError } = await supabase
                     .from('festivals')
@@ -254,6 +259,7 @@ export default function GroupPlannerPage({ params }: { params: Promise<{ id: str
                             sets={sets}
                             selections={groupSelections}
                             loading={dayLoading}
+                            currentUserId={currentUserId}
                         />
                     )}
                 </div>
@@ -377,12 +383,13 @@ function MacroView({ members, stages, sets, selections }: {
     )
 }
 
-function MicroView({ members, stages, sets, selections, loading }: {
+function MicroView({ members, stages, sets, selections, loading, currentUserId }: {
     members: Profile[],
     stages: Stage[],
     sets: Set[],
     selections: GroupSelection[],
-    loading?: boolean
+    loading?: boolean,
+    currentUserId?: string | null
 }) {
 
     const timeToMinutes = (t: string) => { const [h, m] = t.split(':').map(Number); return h * 60 + m; }
@@ -407,8 +414,8 @@ function MicroView({ members, stages, sets, selections, loading }: {
         let redCount = 0
 
         setSelections.forEach(sel => {
-            if (sel.priority === 'green') { score += 5; greenCount++ }
-            if (sel.priority === 'yellow') { score += 3; yellowCount++ }
+            if (sel.priority === 'green') { score += 3; greenCount++ }
+            if (sel.priority === 'yellow') { score += 2; yellowCount++ }
             if (sel.priority === 'red') { score += 1; redCount++ }
         })
         return { set, score, greenCount, yellowCount, redCount }
@@ -529,21 +536,49 @@ function MicroView({ members, stages, sets, selections, loading }: {
                                         return vote && (vote.priority === 'green' || vote.priority === 'yellow');
                                     });
 
+                                    // Check if current user is recommended to this artist
+                                    const userVote = setVotes.find(v => v.user_id === currentUserId);
+                                    let isRecommended = false;
+
+                                    if (userVote) {
+                                        // User voted for this, so easy recommendation
+                                        isRecommended = userVote.priority === 'green' || userVote.priority === 'yellow';
+                                    } else if (!isSplit) {
+                                        // Only one option, so recommended by default
+                                        isRecommended = true;
+                                    } else {
+                                        // In a split AND user didn't vote for either
+                                        // Pick the one with highest consensus (Green votes) or total score
+                                        const otherWinner = block!.winners.find(w => w.set.id !== item.set.id);
+                                        if (otherWinner) {
+                                            if (item.greenCount > otherWinner.greenCount) {
+                                                isRecommended = true;
+                                            } else if (item.greenCount === otherWinner.greenCount && item.score >= otherWinner.score) {
+                                                isRecommended = true;
+                                            }
+                                        }
+                                    }
+
                                     // Priority Logic (Green wins)
                                     const isTopPick = item.greenCount > 0;
                                     const cardBg = isTopPick ? 'bg-white' : 'bg-retro-cream';
-                                    const accentColor = isTopPick ? 'text-retro-teal' : 'text-retro-orange';
+                                    const highlightClass = isRecommended ? 'border-retro-blue border-[3px] -m-[1px] shadow-[6px_6px_0px_0px_rgba(59,130,246,1)]' : 'border-2 border-retro-dark shadow-[4px_4px_0px_0px_rgba(26,44,50,1)] md:shadow-[6px_6px_0px_0px_rgba(26,44,50,1)]';
 
                                     return (
                                         <div key={item.set.id}
                                             className={`
                                                 relative flex-1 ${cardBg}
-                                                border-2 border-retro-dark shadow-[4px_4px_0px_0px_rgba(26,44,50,1)] md:shadow-[6px_6px_0px_0px_rgba(26,44,50,1)]
+                                                ${highlightClass}
                                                 rounded-lg p-3 md:p-5
                                                 transition-all hover:-translate-y-1 hover:shadow-[8px_8px_0px_0px_rgba(26,44,50,1)] duration-200
                                                 ${!isSplit ? 'max-w-md' : ''}
                                             `}
                                         >
+                                            {isRecommended && (
+                                                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-retro-blue text-white text-[10px] font-black px-2 py-0.5 border-2 border-retro-dark z-20 whitespace-nowrap uppercase">
+                                                    Recommended
+                                                </div>
+                                            )}
                                             {/* Header */}
                                             <div className="flex justify-between items-start mb-2 border-b-2 border-retro-dark border-dashed pb-2">
                                                 <div className="text-[10px] font-black text-retro-dark/60 uppercase tracking-widest">

@@ -965,6 +965,15 @@ export default function FestivalManagementPage() {
           ) : (
             <div className="overflow-x-auto">
               <div className="inline-block min-w-full">
+                {/* Add Stage button at Top */}
+                <div className="mb-4 flex justify-end">
+                  <button
+                    onClick={() => handleAddStage(selectedDay)}
+                    className="px-4 py-2 text-sm bg-retro-teal text-retro-dark border-2 border-retro-dark font-black uppercase tracking-wider rounded-lg shadow-[2px_2px_0px_0px_rgba(26,44,50,1)] transition-all hover:-translate-y-0.5"
+                  >
+                    + Add Stage
+                  </button>
+                </div>
                 {/* Timetable Grid */}
                 <div className="border-2 border-retro-dark rounded-lg overflow-hidden bg-retro-cream">
                   {/* Header with stage names */}
@@ -973,13 +982,23 @@ export default function FestivalManagementPage() {
                       Time
                     </div>
                     {currentStages.map((stage) => (
-                      <button
+                      <div
                         key={stage.id}
-                        onClick={() => handleStartEditStage(stage)}
-                        className="p-2 font-black text-retro-dark border-r-2 border-retro-dark last:border-r-0 hover:bg-retro-teal transition-all cursor-pointer"
+                        className="p-1 font-black text-retro-dark border-r-2 border-retro-dark last:border-r-0 flex flex-col items-center"
                       >
-                        <span className="text-sm uppercase tracking-tight">{stage.name}</span>
-                      </button>
+                        <button
+                          onClick={() => handleStartEditStage(stage)}
+                          className="w-full p-2 hover:bg-retro-teal transition-all cursor-pointer text-center"
+                        >
+                          <span className="text-sm uppercase tracking-tight">{stage.name}</span>
+                        </button>
+                        <button
+                          onClick={() => handleAddSet(selectedDay, stage.id)}
+                          className="mt-1 w-full py-1 text-[10px] bg-white hover:bg-retro-orange hover:text-white border border-retro-dark uppercase tracking-widest transition-all"
+                        >
+                          + Add Artist
+                        </button>
+                      </div>
                     ))}
                   </div>
 
@@ -1055,15 +1074,6 @@ export default function FestivalManagementPage() {
                   </div>
                 </div>
 
-                {/* Add Stage button */}
-                <div className="mt-4 flex justify-end">
-                  <button
-                    onClick={() => handleAddStage(selectedDay)}
-                    className="px-4 py-2 bg-retro-teal text-retro-dark border-2 border-retro-dark font-black uppercase tracking-wider rounded-lg shadow-[2px_2px_0px_0px_rgba(26,44,50,1)] transition-all"
-                  >
-                    + Add Stage
-                  </button>
-                </div>
               </div>
             </div>
           )}
@@ -1073,7 +1083,7 @@ export default function FestivalManagementPage() {
         {
           editingSet && (
             <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-              <div className="bg-white rounded-xl border-2 border-retro-dark shadow-[8px_8px_0px_0px_rgba(26,44,50,1)] p-6 md:p-8 w-full max-w-md">
+              <div className="bg-white rounded-xl border-2 border-retro-dark shadow-[8px_8px_0px_0px_rgba(26,44,50,1)] p-6 md:p-8 w-full max-w-md max-h-[90vh] overflow-y-auto">
                 <h2 className="text-2xl font-black text-retro-dark mb-4 uppercase italic tracking-tight">
                   Edit Set
                 </h2>
@@ -1149,7 +1159,7 @@ export default function FestivalManagementPage() {
         {
           editingStage && (
             <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-              <div className="bg-white rounded-xl border-2 border-retro-dark shadow-[8px_8px_0px_0px_rgba(26,44,50,1)] p-6 md:p-8 w-full max-w-md">
+              <div className="bg-white rounded-xl border-2 border-retro-dark shadow-[8px_8px_0px_0px_rgba(26,44,50,1)] p-6 md:p-8 w-full max-w-md max-h-[90vh] overflow-y-auto">
                 <h2 className="text-2xl font-black text-retro-dark mb-4 uppercase italic tracking-tight">
                   Edit Stage
                 </h2>

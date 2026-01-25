@@ -674,7 +674,8 @@ function MicroView({ members, stages, sets, selections, loading, currentUserId }
                                     const setVotes = selections.filter(s => s.set_id === item.set.id);
                                     const interestedMembers = members.filter(m => {
                                         const vote = setVotes.find(v => v.user_id === m.id);
-                                        return vote && (vote.priority === 'green' || vote.priority === 'yellow');
+                                        // Show avatar for ANY vote (Green/Yellow/Red)
+                                        return !!vote;
                                     });
 
                                     // Check if current user is recommended to this artist

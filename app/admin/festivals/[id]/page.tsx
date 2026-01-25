@@ -39,6 +39,8 @@ export default function FestivalManagementPage() {
   const [editingDay, setEditingDay] = useState<string | null>(null)
   const [editingDayName, setEditingDayName] = useState('')
   const [editingDayDate, setEditingDayDate] = useState('')
+  const [festivalStart, setFestivalStart] = useState('12:00')
+  const [festivalEnd, setFestivalEnd] = useState('23:59')
 
   useEffect(() => {
     fetchFestival()
@@ -66,6 +68,8 @@ export default function FestivalManagementPage() {
     setFestival(data)
     setFestivalName(data.name)
     setFestivalYear(data.year)
+    setFestivalStart(data.start_time || '12:00')
+    setFestivalEnd(data.end_time || '23:59')
 
     // Fetch days
     const { data: daysData, error: daysError } = await supabase
@@ -148,6 +152,8 @@ export default function FestivalManagementPage() {
       .update({
         name: festivalName.trim(),
         year: festivalYear,
+        start_time: festivalStart,
+        end_time: festivalEnd,
       })
       .eq('id', festivalId)
 
@@ -614,8 +620,9 @@ export default function FestivalManagementPage() {
 
   // Helper functions for timetable grid
   const timeToMinutes = (time: string): number => {
+    if (!time) return 0;
     const [hours, minutes] = time.split(':').map(Number)
-    return hours * 60 + minutes
+    return hours * 60 + (minutes || 0)
   }
 
   const minutesToTime = (minutes: number): string => {
@@ -632,13 +639,22 @@ export default function FestivalManagementPage() {
     return `${displayHour}:${minutes} ${ampm}`
   }
 
-  // Generate time slots (every 15 minutes from 12:00 to 23:00)
+  // Generate time slots based on festival start/end
   const generateTimeSlots = (): string[] => {
     const slots: string[] = []
-    for (let hour = 12; hour < 24; hour++) {
-      for (let minute = 0; minute < 60; minute += 15) {
-        slots.push(`${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`)
-      }
+    const startMin = timeToMinutes(festivalStart)
+    const endMin = timeToMinutes(festivalEnd)
+
+    // Adjust for overnight festivals (e.g., 2:00 PM to 4:00 AM)
+    let actualEndMin = endMin
+    if (endMin < startMin) {
+      actualEndMin += 24 * 60
+    }
+
+    for (let currentMin = startMin; currentMin <= actualEndMin; currentMin += 15) {
+      const h = Math.floor((currentMin % (24 * 60)) / 60)
+      const m = currentMin % 60
+      slots.push(`${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`)
     }
     return slots
   }
@@ -647,17 +663,30 @@ export default function FestivalManagementPage() {
 
   // Calculate grid position for a set
   const getSetPosition = (set: Set) => {
-    const startMinutes = timeToMinutes(set.start_time)
-    const endMinutes = set.end_time ? timeToMinutes(set.end_time) : startMinutes + 60
-    const startSlot = Math.floor((startMinutes - 12 * 60) / 15)
-    const duration = endMinutes - startMinutes
+    const festivalStartMin = timeToMinutes(festivalStart)
+    const setStartMin = timeToMinutes(set.start_time)
+
+    let adjustedSetStartMin = setStartMin
+    if (setStartMin < festivalStartMin) {
+      adjustedSetStartMin += 24 * 60
+    }
+
+    const startSlot = Math.floor((adjustedSetStartMin - festivalStartMin) / 15)
+
+    const setEndMin = set.end_time ? timeToMinutes(set.end_time) : setStartMin + 60
+    let adjustedSetEndMin = setEndMin
+    if (setEndMin < setStartMin || (setEndMin < festivalStartMin && setStartMin >= festivalStartMin)) {
+      adjustedSetEndMin += 24 * 60
+    }
+
+    const duration = adjustedSetEndMin - adjustedSetStartMin
     const heightSlots = Math.max(1, Math.ceil(duration / 15))
 
     return {
       startSlot,
       heightSlots,
-      startMinutes,
-      endMinutes,
+      startMinutes: adjustedSetStartMin,
+      endMinutes: adjustedSetEndMin,
     }
   }
 
@@ -700,16 +729,22 @@ export default function FestivalManagementPage() {
                 </div>
                 <div>
                   <label className="block text-xs font-black text-retro-dark uppercase tracking-wider mb-2">
-                    Year
+                    Hours (Start - End)
                   </label>
-                  <input
-                    type="number"
-                    value={festivalYear || ''}
-                    onChange={(e) => setFestivalYear(parseInt(e.target.value) || 0)}
-                    min="2020"
-                    max="2100"
-                    className="w-full px-4 py-3 text-lg font-bold text-retro-dark border-2 border-retro-dark rounded-lg bg-white focus:shadow-[4px_4px_0px_0px_rgba(26,44,50,1)] focus:-translate-y-0.5 outline-none transition-all"
-                  />
+                  <div className="flex gap-2">
+                    <input
+                      type="time"
+                      value={festivalStart}
+                      onChange={(e) => setFestivalStart(e.target.value)}
+                      className="flex-1 px-4 py-3 text-lg font-bold text-retro-dark border-2 border-retro-dark rounded-lg bg-white focus:shadow-[4px_4px_0px_0px_rgba(26,44,50,1)] outline-none transition-all"
+                    />
+                    <input
+                      type="time"
+                      value={festivalEnd}
+                      onChange={(e) => setFestivalEnd(e.target.value)}
+                      className="flex-1 px-4 py-3 text-lg font-bold text-retro-dark border-2 border-retro-dark rounded-lg bg-white focus:shadow-[4px_4px_0px_0px_rgba(26,44,50,1)] outline-none transition-all"
+                    />
+                  </div>
                 </div>
               </div>
               <div className="flex gap-2">
@@ -977,18 +1012,18 @@ export default function FestivalManagementPage() {
                 {/* Timetable Grid */}
                 <div className="border-2 border-retro-dark rounded-lg overflow-hidden bg-retro-cream">
                   {/* Header with stage names */}
-                  <div className="grid bg-retro-blue" style={{ gridTemplateColumns: `80px repeat(${currentStages.length}, 1fr)` }}>
-                    <div className="p-3 font-black text-retro-dark border-r-2 border-retro-dark uppercase tracking-wider text-sm">
+                  <div className="grid bg-retro-cream border-b-2 border-retro-dark" style={{ gridTemplateColumns: `80px repeat(${currentStages.length}, 1fr)` }}>
+                    <div className="p-3 font-black text-retro-dark border-r-2 border-retro-dark uppercase tracking-wider text-xs">
                       Time
                     </div>
                     {currentStages.map((stage) => (
                       <div
                         key={stage.id}
-                        className="p-1 font-black text-retro-dark border-r-2 border-retro-dark last:border-r-0 flex flex-col items-center"
+                        className="p-1 font-black text-retro-dark border-l-2 border-retro-dark last:border-r-0 flex flex-col items-center"
                       >
                         <button
                           onClick={() => handleStartEditStage(stage)}
-                          className="w-full p-2 hover:bg-retro-teal transition-all cursor-pointer text-center"
+                          className="w-full p-2 hover:bg-white transition-all cursor-pointer text-center"
                         >
                           <span className="text-sm uppercase tracking-tight">{stage.name}</span>
                         </button>
@@ -1016,7 +1051,7 @@ export default function FestivalManagementPage() {
                           style={{ gridTemplateColumns: `80px repeat(${currentStages.length}, 1fr)`, minHeight: '24px' }}
                         >
                           {/* Time column */}
-                          <div className="p-1.5 text-xs font-bold text-retro-dark border-r-2 border-retro-dark/30 bg-retro-cream">
+                          <div className="p-1.5 text-xs font-bold text-retro-dark/50 bg-retro-cream/50 text-right pr-3 border-r-2 border-retro-dark">
                             {displayTime}
                           </div>
 
@@ -1024,18 +1059,13 @@ export default function FestivalManagementPage() {
                           {currentStages.map((stage, stageIndex) => {
                             const stageSets = currentSets.filter(s => s.stage_id === stage.id)
 
-                            // Find sets that start at this slot
-                            const setsStartingHere = stageSets.filter(set => {
-                              const pos = getSetPosition(set)
-                              return slotIndex === pos.startSlot
-                            })
-
                             return (
                               <div
                                 key={`${stage.id}-slot-${slotIndex}`}
-                                className="border-r-2 border-retro-dark/20 last:border-r-0 bg-white relative"
+                                className="border-l-2 border-retro-dark last:border-r-0 relative"
+                                style={{ overflow: 'visible' }}
                               >
-                                {setsStartingHere.map((set) => {
+                                {stageSets.filter(set => getSetPosition(set).startSlot === slotIndex).map((set) => {
                                   const pos = getSetPosition(set)
                                   const heightPx = pos.heightSlots * 24 // 24px per 15-min slot
                                   const isShort = heightPx < 60
@@ -1045,21 +1075,24 @@ export default function FestivalManagementPage() {
                                     <button
                                       key={set.id}
                                       onClick={() => handleStartEditSet(set)}
-                                      className="absolute left-1 right-1 top-0.5 bg-retro-orange/20 hover:bg-retro-orange/30 border-2 border-retro-orange rounded-md text-left transition-all cursor-pointer z-10 shadow-[2px_2px_0px_0px_rgba(26,44,50,0.3)] overflow-hidden"
+                                      className="absolute left-1 right-1 top-0.5 bg-white border-2 border-retro-dark rounded-none text-center transition-all cursor-pointer z-10 shadow-[2px_2px_0px_0px_rgba(26,44,50,1)] overflow-hidden flex flex-col items-center justify-center p-1"
                                       style={{
                                         height: `${heightPx}px`,
                                         minHeight: '32px',
-                                        padding: isVeryShort ? '4px 6px' : isShort ? '6px 8px' : '8px'
                                       }}
                                       title={`${set.artist_name}${set.end_time ? ` (${formatTime(set.start_time)} - ${formatTime(set.end_time)})` : ` (${formatTime(set.start_time)})`}`}
                                     >
-                                      <div className={`font-black text-retro-dark truncate leading-tight ${isVeryShort ? 'text-xs' : isShort ? 'text-xs' : 'text-sm'}`}>
+                                      <div
+                                        className="font-black text-retro-dark uppercase leading-tight truncate w-full"
+                                        style={{
+                                          fontSize: isVeryShort ? '8px' : isShort ? '10px' : '12px'
+                                        }}
+                                      >
                                         {set.artist_name}
                                       </div>
                                       {!isVeryShort && (
-                                        <div className={`text-retro-dark/70 font-bold truncate leading-tight ${isShort ? 'text-[10px] mt-0.5' : 'text-xs mt-0.5'}`}>
+                                        <div className="text-[10px] font-bold text-retro-dark opacity-70 mt-0.5">
                                           {formatTime(set.start_time)}
-                                          {set.end_time && ` - ${formatTime(set.end_time)}`}
                                         </div>
                                       )}
                                     </button>

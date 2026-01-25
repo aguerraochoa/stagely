@@ -37,7 +37,11 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
     const [group, setGroup] = useState<Group | null>(null)
     const [members, setMembers] = useState<Member[]>([])
     const [festivals, setFestivals] = useState<Festival[]>([])
+    const [allFestivals, setAllFestivals] = useState<Festival[]>([])
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+    const [searchQuery, setSearchQuery] = useState('')
     const [loading, setLoading] = useState(true)
+    const [adding, setAdding] = useState(false)
     const [currentUser, setCurrentUser] = useState<any>(null)
     const router = useRouter()
     const supabase = createClient()
@@ -95,14 +99,26 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
                 setMembers((membersData as any[]) || [])
                 console.log('GroupDetailPage: Members Found:', membersData?.length)
 
-                // 3. Fetch All Festivals (for planning)
+                // 3. Fetch Group's Festivals (through join table)
                 const { data: festivalsData, error: festivalsError } = await supabase
+                    .from('group_festivals')
+                    .select(`
+                      festival_id,
+                      festivals:festival_id(id, name, year)
+                    `)
+                    .eq('group_id', resolvedParams.id)
+
+                if (festivalsError) throw festivalsError
+                const groupFests = festivalsData?.map((f: any) => f.festivals) || []
+                setFestivals(groupFests)
+
+                // 4. Fetch All Festivals (for the modal)
+                const { data: allFestsData } = await supabase
                     .from('festivals')
                     .select('id, name, year')
                     .order('year', { ascending: false })
 
-                if (festivalsError) throw festivalsError
-                setFestivals(festivalsData || [])
+                setAllFestivals(allFestsData || [])
 
             } catch (error) {
                 console.error('Error fetching group data:', error)
@@ -120,6 +136,49 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
             alert(`Invite code ${group.invite_code} copied to clipboard!`)
         }
     }
+
+    const handleAddFestival = async (festivalId: string) => {
+        setAdding(true)
+        try {
+            const { error } = await supabase
+                .from('group_festivals')
+                .insert({ group_id: resolvedParams.id, festival_id: festivalId })
+
+            if (error) throw error
+
+            // Refresh local state
+            const festToAdd = allFestivals.find(f => f.id === festivalId)
+            if (festToAdd) setFestivals([...festivals, festToAdd])
+            setIsAddModalOpen(false)
+        } catch (err) {
+            console.error('Error adding festival:', err)
+            alert('Error adding festival. Make sure you ran the SQL migration!')
+        } finally {
+            setAdding(false)
+        }
+    }
+
+    const handleRemoveFestival = async (festivalId: string) => {
+        if (!confirm('Are you sure you want to remove this festival from the group? This will NOT delete any votes.')) return
+
+        try {
+            const { error } = await supabase
+                .from('group_festivals')
+                .delete()
+                .eq('group_id', resolvedParams.id)
+                .eq('festival_id', festivalId)
+
+            if (error) throw error
+            setFestivals(festivals.filter(f => f.id !== festivalId))
+        } catch (err) {
+            console.error('Error removing festival:', err)
+        }
+    }
+
+    const filteredAvailableFestivals = allFestivals.filter(f =>
+        !festivals.find(gf => gf.id === f.id) &&
+        (f.name.toLowerCase().includes(searchQuery.toLowerCase()) || f.year.toString().includes(searchQuery))
+    )
 
     if (loading) {
         return (
@@ -195,32 +254,60 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Main Column: Active Plans/Festivals */}
                     <div className="lg:col-span-2 space-y-6">
-                        <h2 className="text-2xl font-black text-retro-dark uppercase italic tracking-tighter">
-                            Start Planning
-                        </h2>
+                        <div className="flex justify-between items-center">
+                            <h2 className="text-2xl font-black text-retro-dark uppercase italic tracking-tighter">
+                                Start Planning
+                            </h2>
+                            <button
+                                onClick={() => setIsAddModalOpen(true)}
+                                className="px-4 py-2 text-xs font-black uppercase tracking-wider bg-retro-teal text-retro-dark border-2 border-retro-dark rounded-lg shadow-[2px_2px_0px_0px_rgba(26,44,50,1)] hover:-translate-y-0.5 transition-all"
+                            >
+                                + Add Festival
+                            </button>
+                        </div>
 
                         <div className="grid grid-cols-1 gap-4">
-                            {festivals.map((festival) => (
-                                <Link
-                                    key={festival.id}
-                                    href={`/groups/${group.id}/plans/${festival.id}`}
-                                    className="group flex justify-between items-center p-6 bg-white border-2 border-retro-dark shadow-[4px_4px_0px_0px_rgba(26,44,50,1)] rounded-xl hover:-translate-y-1 hover:shadow-[8px_8px_0px_0px_rgba(26,44,50,1)] transition-all"
-                                >
-                                    <div>
-                                        <h3 className="text-xl font-black text-retro-dark uppercase italic">
-                                            {festival.name}
-                                        </h3>
-                                        <p className="text-retro-dark/60 font-bold">
-                                            {festival.year}
-                                        </p>
-                                    </div>
-                                    <div className="flex items-center text-retro-orange font-black uppercase tracking-wider">
-                                        Open Planner
-                                        <svg className="w-5 h-5 ml-2 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                            {festivals.length === 0 ? (
+                                <div className="p-12 text-center bg-white border-2 border-retro-dark border-dashed rounded-xl opacity-60">
+                                    <p className="font-bold text-retro-dark">No festivals added to this group yet.</p>
+                                    <button
+                                        onClick={() => setIsAddModalOpen(true)}
+                                        className="mt-4 text-sm font-black text-retro-orange uppercase hover:underline"
+                                    >
+                                        Browse Festivals
+                                    </button>
+                                </div>
+                            ) : festivals.map((festival) => (
+                                <div key={festival.id} className="group relative">
+                                    <Link
+                                        href={`/groups/${group.id}/plans/${festival.id}`}
+                                        className="flex justify-between items-center p-6 bg-white border-2 border-retro-dark shadow-[4px_4px_0px_0px_rgba(26,44,50,1)] rounded-xl hover:-translate-y-1 hover:shadow-[8px_8px_0px_0px_rgba(26,44,50,1)] transition-all"
+                                    >
+                                        <div>
+                                            <h3 className="text-xl font-black text-retro-dark uppercase italic">
+                                                {festival.name}
+                                            </h3>
+                                            <p className="text-retro-dark/60 font-bold">
+                                                {festival.year}
+                                            </p>
+                                        </div>
+                                        <div className="flex items-center text-retro-orange font-black uppercase tracking-wider mr-12">
+                                            Open Planner
+                                            <svg className="w-5 h-5 ml-2 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                                            </svg>
+                                        </div>
+                                    </Link>
+                                    <button
+                                        onClick={() => handleRemoveFestival(festival.id)}
+                                        className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-retro-dark/30 hover:text-retro-orange transition-colors z-10"
+                                        title="Remove from group"
+                                    >
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                         </svg>
-                                    </div>
-                                </Link>
+                                    </button>
+                                </div>
                             ))}
                         </div>
                     </div>
@@ -256,6 +343,63 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
                     </div>
                 </div>
             </main>
+
+            {/* Add Festival Modal */}
+            {isAddModalOpen && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div className="bg-white border-4 border-retro-dark shadow-[12px_12px_0px_0px_rgba(26,44,50,1)] rounded-xl w-full max-w-xl max-h-[80vh] flex flex-col">
+                        <div className="p-6 border-b-2 border-retro-dark flex justify-between items-center bg-retro-cream">
+                            <h2 className="text-2xl font-black text-retro-dark uppercase italic tracking-tight">Add Festival to Group</h2>
+                            <button onClick={() => setIsAddModalOpen(false)} className="text-retro-dark hover:text-retro-orange transition-colors">
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div className="p-6">
+                            <div className="relative mb-6">
+                                <input
+                                    type="text"
+                                    placeholder="Search festivals (e.g. Coachella, 2024)..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="w-full pl-12 pr-4 py-4 bg-retro-cream border-2 border-retro-dark rounded-xl font-bold text-retro-dark outline-none focus:shadow-[4px_4px_0px_0px_rgba(26,44,50,1)] transition-all"
+                                />
+                                <div className="absolute left-4 top-1/2 -translate-y-1/2">
+                                    <svg className="w-6 h-6 text-retro-dark/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="flex-1 overflow-y-auto p-6 pt-0 space-y-4">
+                            {filteredAvailableFestivals.length === 0 ? (
+                                <div className="text-center py-12 text-retro-dark/40 font-black uppercase italic tracking-widest">
+                                    No festivals found
+                                </div>
+                            ) : (
+                                filteredAvailableFestivals.map(fest => (
+                                    <div key={fest.id} className="flex items-center justify-between p-4 bg-retro-cream border-2 border-retro-dark rounded-xl shadow-[4px_4px_0px_0px_rgba(26,44,50,1)] hover:-translate-y-0.5 transition-all">
+                                        <div>
+                                            <div className="font-black text-retro-dark uppercase italic">{fest.name}</div>
+                                            <div className="text-xs font-bold text-retro-dark/60">{fest.year}</div>
+                                        </div>
+                                        <button
+                                            onClick={() => handleAddFestival(fest.id)}
+                                            disabled={adding}
+                                            className="px-4 py-2 bg-retro-orange text-white text-xs font-black uppercase tracking-widest border-2 border-retro-dark shadow-[2px_2px_0px_0px_rgba(26,44,50,1)] hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 transition-all"
+                                        >
+                                            {adding ? 'Adding...' : 'Add to Group'}
+                                        </button>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

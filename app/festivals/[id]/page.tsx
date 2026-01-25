@@ -227,6 +227,7 @@ export default function FestivalDetailPage({ params }: { params: Promise<{ id: s
   }
 
   const formatTime = (time: string): string => {
+    if (!time) return ''
     const [hours, minutes] = time.split(':')
     const hour = parseInt(hours)
     const ampm = hour >= 12 ? 'PM' : 'AM'
@@ -234,32 +235,54 @@ export default function FestivalDetailPage({ params }: { params: Promise<{ id: s
     return `${displayHour}:${minutes} ${ampm}`
   }
 
-  // Generate time slots (every 15 minutes from 12:00 to 23:00)
-  const generateTimeSlots = (): string[] => {
+  // Generate time slots based on festival start/end
+  const generateTimeSlots = (start?: string, end?: string): string[] => {
     const slots: string[] = []
-    for (let hour = 12; hour < 24; hour++) {
-      for (let minute = 0; minute < 60; minute += 15) {
-        slots.push(`${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`)
-      }
+    const startMin = timeToMinutes(start || '12:00')
+    const endMin = timeToMinutes(end || '23:59')
+
+    let actualEndMin = endMin
+    if (endMin < startMin) {
+      actualEndMin += 24 * 60
+    }
+
+    for (let currentMin = startMin; currentMin <= actualEndMin; currentMin += 15) {
+      const h = Math.floor((currentMin % (24 * 60)) / 60)
+      const m = currentMin % 60
+      slots.push(`${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`)
     }
     return slots
   }
 
-  const timeSlots = generateTimeSlots()
+  const timeSlots = generateTimeSlots((festival as any)?.start_time, (festival as any)?.end_time)
 
   // Calculate grid position for a set
   const getSetPosition = (set: Set) => {
-    const startMinutes = timeToMinutes(set.start_time)
-    const endMinutes = set.end_time ? timeToMinutes(set.end_time) : startMinutes + 60
-    const startSlot = Math.floor((startMinutes - 12 * 60) / 15)
-    const duration = endMinutes - startMinutes
+    const festivalStart = (festival as any)?.start_time || '12:00'
+    const festivalStartMin = timeToMinutes(festivalStart)
+    const setStartMin = timeToMinutes(set.start_time)
+
+    let adjustedSetStartMin = setStartMin
+    if (setStartMin < festivalStartMin) {
+      adjustedSetStartMin += 24 * 60
+    }
+
+    const startSlot = Math.floor((adjustedSetStartMin - festivalStartMin) / 15)
+
+    const setEndMin = set.end_time ? timeToMinutes(set.end_time) : setStartMin + 60
+    let adjustedSetEndMin = setEndMin
+    if (setEndMin < setStartMin || (setEndMin < festivalStartMin && setStartMin >= festivalStartMin)) {
+      adjustedSetEndMin += 24 * 60
+    }
+
+    const duration = adjustedSetEndMin - adjustedSetStartMin
     const heightSlots = Math.max(1, Math.ceil(duration / 15))
 
     return {
       startSlot,
       heightSlots,
-      startMinutes,
-      endMinutes,
+      startMinutes: adjustedSetStartMin,
+      endMinutes: adjustedSetEndMin,
     }
   }
 
@@ -430,17 +453,26 @@ export default function FestivalDetailPage({ params }: { params: Promise<{ id: s
                                     <button
                                       key={set.id}
                                       onClick={() => togglePriority(set)}
-                                      className={`absolute left-1 right-1 top-0.5 rounded-none border-2 z-10 hover:z-20 hover:scale-[1.02] transition-all overflow-hidden p-2 flex flex-col justify-center items-center ${getPriorityStyles(priority)}`}
+                                      className={`absolute left-1 right-1 top-0.5 rounded-none border-2 z-10 hover:z-20 hover:scale-[1.02] transition-all overflow-hidden p-1 flex flex-col justify-center items-center ${getPriorityStyles(priority)}`}
                                       style={{
                                         height: `${heightPx}px`,
                                         minHeight: '32px'
                                       }}
                                     >
-                                      <div className={`font-black text-xs uppercase truncate leading-tight w-full ${isVeryShort ? 'text-[10px]' : ''}`}>
+                                      <div
+                                        className="font-black uppercase leading-tight w-full text-center"
+                                        style={{
+                                          fontSize: isVeryShort ? '8px' : isShort ? '10px' : '12px',
+                                          overflow: 'hidden',
+                                          display: '-webkit-box',
+                                          WebkitLineClamp: 2,
+                                          WebkitBoxOrient: 'vertical'
+                                        }}
+                                      >
                                         {set.artist_name}
                                       </div>
                                       {!isVeryShort && (
-                                        <div className="text-[10px] font-bold opacity-80 mt-1">
+                                        <div className="text-[10px] font-bold opacity-80 mt-0.5">
                                           {formatTime(set.start_time)}
                                         </div>
                                       )}

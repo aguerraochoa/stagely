@@ -251,6 +251,8 @@ export default function GroupPlannerPage({ params }: { params: Promise<{ id: str
                             stages={stages}
                             sets={sets}
                             selections={groupSelections}
+                            festivalStart={(festival as any)?.start_time}
+                            festivalEnd={(festival as any)?.end_time}
                         />
                     ) : (
                         <MicroView
@@ -260,6 +262,8 @@ export default function GroupPlannerPage({ params }: { params: Promise<{ id: str
                             selections={groupSelections}
                             loading={dayLoading}
                             currentUserId={currentUserId}
+                            festivalStart={(festival as any)?.start_time}
+                            festivalEnd={(festival as any)?.end_time}
                         />
                     )}
                 </div>
@@ -272,11 +276,13 @@ export default function GroupPlannerPage({ params }: { params: Promise<{ id: str
 // Sub-Components (Ideally in separate files)
 // ------------------------------------------
 
-function MacroView({ members, stages, sets, selections }: {
+function MacroView({ members, stages, sets, selections, festivalStart, festivalEnd }: {
     members: Profile[],
     stages: Stage[],
     sets: Set[],
-    selections: GroupSelection[]
+    selections: GroupSelection[],
+    festivalStart?: string,
+    festivalEnd?: string
 }) {
     // Helper to get all avatars for a specific set
     const getSetAvatars = (setId: string) => {
@@ -288,11 +294,21 @@ function MacroView({ members, stages, sets, selections }: {
             })
     }
 
-    // Time slots helper (same as before)
+    // Time slots helper based on festival start/end
     const generateTimeSlots = () => {
         const slots = []
-        for (let h = 12; h < 24; h++) {
-            for (let m = 0; m < 60; m += 15) slots.push(`${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`)
+        const startMin = timeToMinutes(festivalStart || '12:00')
+        const endMin = timeToMinutes(festivalEnd || '23:59')
+
+        let actualEndMin = endMin
+        if (endMin < startMin) {
+            actualEndMin += 24 * 60
+        }
+
+        for (let currentMin = startMin; currentMin <= actualEndMin; currentMin += 15) {
+            const h = Math.floor((currentMin % (24 * 60)) / 60)
+            const m = currentMin % 60
+            slots.push(`${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`)
         }
         return slots
     }
@@ -300,10 +316,23 @@ function MacroView({ members, stages, sets, selections }: {
 
     const timeToMinutes = (t: string) => { const [h, m] = t.split(':').map(Number); return h * 60 + m; }
     const getPosition = (set: Set) => {
-        const start = timeToMinutes(set.start_time)
-        const end = set.end_time ? timeToMinutes(set.end_time) : start + 60
-        const startSlot = Math.floor((start - 12 * 60) / 15)
-        const heightSlots = Math.ceil((end - start) / 15)
+        const festivalStartMin = timeToMinutes(festivalStart || '12:00')
+        const startMin = timeToMinutes(set.start_time)
+
+        let adjustedStartMin = startMin
+        if (startMin < festivalStartMin) {
+            adjustedStartMin += 24 * 60
+        }
+
+        const startSlot = Math.floor((adjustedStartMin - festivalStartMin) / 15)
+
+        const endMin = set.end_time ? timeToMinutes(set.end_time) : startMin + 60
+        let adjustedEndMin = endMin
+        if (endMin < startMin || (endMin < festivalStartMin && startMin >= festivalStartMin)) {
+            adjustedEndMin += 24 * 60
+        }
+
+        const heightSlots = Math.max(1, Math.ceil((adjustedEndMin - adjustedStartMin) / 15))
         return { startSlot, heightSlots }
     }
     const getPriorityColor = (p: Priority) => {
@@ -352,7 +381,14 @@ function MacroView({ members, stages, sets, selections }: {
                                                 <div key={set.id}
                                                     className="absolute left-1 right-1 top-0.5 rounded-none border-2 border-retro-dark bg-white shadow-[2px_2px_0px_0px_rgba(26,44,50,1)] p-2 z-10 hover:z-20 hover:scale-[1.02] transition-all overflow-hidden"
                                                     style={{ height: `${Math.max(32, pos.heightSlots * 24)}px` }}>
-                                                    <div className="font-black text-xs uppercase text-retro-dark truncate leading-tight">{set.artist_name}</div>
+                                                    <div
+                                                        className="font-black text-retro-dark uppercase leading-tight truncate w-full"
+                                                        style={{
+                                                            fontSize: pos.heightSlots <= 1 ? '8px' : pos.heightSlots <= 2 ? '10px' : '12px'
+                                                        }}
+                                                    >
+                                                        {set.artist_name}
+                                                    </div>
 
                                                     {/* Avatars Overlay */}
                                                     <div className="flex -space-x-1 mt-1 overflow-hidden py-1">
@@ -389,7 +425,9 @@ function MicroView({ members, stages, sets, selections, loading, currentUserId }
     sets: Set[],
     selections: GroupSelection[],
     loading?: boolean,
-    currentUserId?: string | null
+    currentUserId?: string | null,
+    festivalStart?: string,
+    festivalEnd?: string
 }) {
 
     const timeToMinutes = (t: string) => { const [h, m] = t.split(':').map(Number); return h * 60 + m; }
@@ -594,7 +632,14 @@ function MicroView({ members, stages, sets, selections, loading, currentUserId }
                                             </div>
 
                                             {/* Artist */}
-                                            <div className="text-lg md:text-2xl font-black text-retro-dark mb-2 md:mb-4 uppercase italic tracking-tight leading-none break-words">
+                                            <div
+                                                className="font-black text-retro-dark uppercase italic tracking-tight leading-none break-words"
+                                                style={{
+                                                    fontSize: isSplit ? '1.25rem' : '1.5rem',
+                                                    ...(item.set.artist_name.length > 20 ? { fontSize: isSplit ? '1rem' : '1.25rem' } : {}),
+                                                    ...(item.set.artist_name.length > 30 ? { fontSize: isSplit ? '0.875rem' : '1rem' } : {})
+                                                }}
+                                            >
                                                 {item.set.artist_name}
                                             </div>
 

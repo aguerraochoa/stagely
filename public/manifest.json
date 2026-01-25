@@ -1,0 +1,22 @@
+{
+    "name": "Stagely",
+    "short_name": "Stagely",
+    "description": "Plan your music festival day with friends using the familiar festival timetable grid",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#FFFDF5",
+    "theme_color": "#FFFDF5",
+    "icons": [
+        {
+            "src": "/icon.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/apple-icon.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}

@@ -180,8 +180,27 @@ export default function LoginPage() {
     setLoading(true)
     setMessage('')
 
+    let signInEmail = email.trim().toLowerCase()
+
+    // 1. Detect if it's a username (no @)
+    if (!signInEmail.includes('@')) {
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('email')
+        .eq('username', signInEmail)
+        .single()
+
+      if (profileError || !profile?.email) {
+        setMessage('Username not found. Please check your spelling or use your email.')
+        setLoading(false)
+        return
+      }
+      signInEmail = profile.email
+    }
+
+    // 2. Proceed with sign in
     const { data, error } = await supabase.auth.signInWithPassword({
-      email,
+      email: signInEmail,
       password,
     })
 
@@ -314,17 +333,17 @@ export default function LoginPage() {
           >
             <div>
               <label htmlFor="email" className="block text-xs font-black text-retro-dark uppercase tracking-wider mb-2">
-                Email
+                {mode === 'signup' ? 'Email Address' : 'Username or Email'}
               </label>
               <input
                 id="email"
-                type="email"
+                type={mode === 'signup' ? 'email' : 'text'}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 disabled={loading}
                 className="w-full px-4 py-3 border-2 border-retro-dark rounded-lg bg-white text-retro-dark font-bold focus:shadow-[4px_4px_0px_0px_rgba(26,44,50,1)] focus:-translate-y-0.5 outline-none transition-all placeholder-retro-dark/30 disabled:opacity-50"
-                placeholder="you@example.com"
+                placeholder={mode === 'signup' ? 'you@example.com' : 'username or email'}
               />
             </div>
 
@@ -369,23 +388,9 @@ export default function LoginPage() {
             )}
 
             <div>
-              <div className="flex items-center justify-between mb-2">
-                <label htmlFor="password" className="block text-xs font-black text-retro-dark uppercase tracking-wider">
-                  Password
-                </label>
-                {mode === 'signin' && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowForgotPassword(true)
-                      setResetEmail(email)
-                    }}
-                    className="text-xs font-bold text-retro-orange hover:text-retro-dark hover:underline"
-                  >
-                    Forgot password?
-                  </button>
-                )}
-              </div>
+              <label htmlFor="password" className="block text-xs font-black text-retro-dark uppercase tracking-wider mb-2">
+                Password
+              </label>
               <input
                 id="password"
                 type="password"
@@ -397,6 +402,20 @@ export default function LoginPage() {
                 className="w-full px-4 py-3 border-2 border-retro-dark rounded-lg bg-white text-retro-dark font-bold focus:shadow-[4px_4px_0px_0px_rgba(26,44,50,1)] focus:-translate-y-0.5 outline-none transition-all placeholder-retro-dark/30 disabled:opacity-50"
                 placeholder={mode === 'signup' ? 'At least 8 characters' : 'Enter your password'}
               />
+              {mode === 'signin' && (
+                <div className="flex justify-end mt-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowForgotPassword(true)
+                      setResetEmail(email)
+                    }}
+                    className="text-xs font-bold text-retro-orange hover:text-retro-dark hover:underline"
+                  >
+                    Forgot password?
+                  </button>
+                </div>
+              )}
               {mode === 'signup' && (
                 <p className="mt-1 text-[10px] font-bold text-retro-dark/60">
                   Must include: uppercase, lowercase, digit, and symbol

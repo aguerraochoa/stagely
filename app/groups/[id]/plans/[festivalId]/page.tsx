@@ -47,6 +47,16 @@ type GroupSelection = {
     priority: Priority
 }
 
+const getInitials = (profile: Profile) => {
+    const name = profile.display_name || profile.username || '?';
+    if (!name || name === '?') return '?';
+    const parts = name.trim().split(/\s+/);
+    if (parts.length >= 2) {
+        return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase();
+};
+
 export default function GroupPlannerPage({ params }: { params: Promise<{ id: string; festivalId: string }> }) {
     const resolvedParams = use(params)
     const [activeTab, setActiveTab] = useState<'macro' | 'micro'>('macro')
@@ -173,52 +183,76 @@ export default function GroupPlannerPage({ params }: { params: Promise<{ id: str
     }, [selectedDay, members, supabase])
 
     // -- Render Helpers --
-    if (loading) return <div className="p-12 text-center">Loading Planner...</div>
+    if (loading) return (
+        <div className="flex h-[400px] items-center justify-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-retro-orange"></div>
+        </div>
+    )
     if (!festival) return <div className="p-12 text-center">Festival not found</div>
 
     return (
         <div className="min-h-screen bg-retro-cream text-retro-dark">
             {/* Navigation */}
-            <nav className="bg-white border-b-2 border-retro-dark">
+            {/* Navigation */}
+            <nav className="bg-white border-b-2 border-retro-dark sticky top-0 z-50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex flex-wrap justify-between items-center py-3 gap-2">
-                        {/* Left side: Back + Title */}
-                        <div className="flex items-center gap-2 md:gap-4 min-w-0">
-                            <Link href={`/groups/${resolvedParams.id}`} className="font-bold text-retro-dark hover:text-retro-orange uppercase tracking-tight text-sm whitespace-nowrap">
-                                ← Back
+                    <div className="flex justify-between h-16 items-center gap-4">
+                        {/* Left side: Logo + Title */}
+                        <div className="flex items-center gap-4 min-w-0">
+                            <Link href="/">
+                                <img src="/icon.png" alt="Stagely Logo" className="h-8 w-auto min-w-[32px]" />
                             </Link>
-                            <div className="h-4 md:h-6 w-0.5 bg-retro-dark"></div>
+                            <div className="h-6 w-0.5 bg-retro-dark/20"></div>
                             <span className="font-black text-sm md:text-xl uppercase italic tracking-tighter text-retro-dark truncate">{festival.name}</span>
                         </div>
-                        {/* Right side: Toggles */}
-                        <div className="flex gap-1 md:gap-2">
+
+                        {/* Right side: Actions, Toggles, Back */}
+                        <div className="flex items-center gap-2 md:gap-4">
+                            {/* Desktop Edit Link */}
                             <Link
                                 href={`/festivals/${festival.id}`}
-                                className="hidden md:flex px-3 py-1.5 text-xs font-bold text-retro-orange hover:text-retro-dark items-center gap-1"
+                                className="hidden lg:flex px-3 py-1.5 text-xs font-bold text-retro-orange hover:text-retro-dark items-center gap-1"
                             >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                                 </svg>
                                 Edit
                             </Link>
-                            <button
-                                onClick={() => setActiveTab('macro')}
-                                className={`px-3 md:px-4 py-1.5 text-xs md:text-sm font-black uppercase tracking-wider border-2 border-retro-dark transition-all ${activeTab === 'macro'
-                                    ? 'bg-retro-orange text-white shadow-[2px_2px_0px_0px_rgba(26,44,50,1)] -translate-y-0.5'
-                                    : 'bg-white text-retro-dark hover:bg-slate-50'
-                                    }`}
+
+                            {/* View Toggles */}
+                            <div className="flex border-2 border-retro-dark rounded-lg overflow-hidden bg-white shadow-[2px_2px_0px_0px_rgba(26,44,50,1)]">
+                                <button
+                                    onClick={() => setActiveTab('macro')}
+                                    className={`px-3 md:px-4 py-1.5 text-[10px] md:text-xs font-black uppercase tracking-wider transition-all ${activeTab === 'macro'
+                                        ? 'bg-retro-orange text-white'
+                                        : 'bg-white text-retro-dark hover:bg-retro-cream'
+                                        }`}
+                                >
+                                    Heat Map
+                                </button>
+                                <button
+                                    onClick={() => setActiveTab('micro')}
+                                    className={`px-3 md:px-4 py-1.5 text-[10px] md:text-xs font-black uppercase tracking-wider border-l-2 border-retro-dark transition-all ${activeTab === 'micro'
+                                        ? 'bg-retro-blue text-white'
+                                        : 'bg-white text-retro-dark hover:bg-retro-cream'
+                                        }`}
+                                >
+                                    Ideal Path
+                                </button>
+                            </div>
+
+                            {/* Profile Link */}
+                            <Link
+                                href="/profile"
+                                className="w-8 h-8 rounded-full border-2 border-retro-dark bg-retro-teal flex items-center justify-center text-[10px] font-black hover:-translate-y-0.5 transition-all shadow-[2px_2px_0px_0px_rgba(26,44,50,1)]"
+                                title="My Profile"
                             >
-                                Heat Map
-                            </button>
-                            <button
-                                onClick={() => setActiveTab('micro')}
-                                className={`px-3 md:px-4 py-1.5 text-xs md:text-sm font-black uppercase tracking-wider border-2 border-retro-dark transition-all ${activeTab === 'micro'
-                                    ? 'bg-retro-blue text-white shadow-[2px_2px_0px_0px_rgba(26,44,50,1)] -translate-y-0.5'
-                                    : 'bg-white text-retro-dark hover:bg-slate-50'
-                                    }`}
-                            >
-                                Ideal Path
-                            </button>
+                                {getInitials(members.find(m => m.id === currentUserId) || { username: '?' } as Profile)}
+                            </Link>
+
+                            <Link href={`/groups/${resolvedParams.id}`} className="font-black text-retro-dark hover:text-retro-orange uppercase tracking-wider text-xs whitespace-nowrap">
+                                Back
+                            </Link>
                         </div>
                     </div>
                 </div>
@@ -227,7 +261,7 @@ export default function GroupPlannerPage({ params }: { params: Promise<{ id: str
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 {/* Day Picker */}
                 {days.length > 0 && (
-                    <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
+                    <div className="flex gap-2 mb-6 overflow-x-auto pt-2 pb-2">
                         {days.map(day => (
                             <button
                                 key={day.id}
@@ -290,8 +324,16 @@ function MacroView({ members, stages, sets, selections, festivalStart, festivalE
             .filter(s => s.set_id === setId)
             .map(s => {
                 const member = members.find(m => m.id === s.user_id)
+                if (!member) return null;
                 return { ...member, priority: s.priority }
             })
+            .filter((a): a is (Profile & { priority: Priority }) => a !== null)
+    }
+
+    const timeToMinutes = (t: string) => {
+        if (!t) return 0;
+        const [h, m] = t.split(':').map(Number);
+        return h * 60 + (m || 0);
     }
 
     // Time slots helper based on festival start/end
@@ -314,7 +356,6 @@ function MacroView({ members, stages, sets, selections, festivalStart, festivalE
     }
     const timeSlots = generateTimeSlots()
 
-    const timeToMinutes = (t: string) => { const [h, m] = t.split(':').map(Number); return h * 60 + m; }
     const getPosition = (set: Set) => {
         const festivalStartMin = timeToMinutes(festivalStart || '12:00')
         const startMin = timeToMinutes(set.start_time)
@@ -400,7 +441,7 @@ function MacroView({ members, stages, sets, selections, festivalStart, festivalE
                                                                 {ava?.avatar_url ? (
                                                                     <img src={ava.avatar_url} alt={ava.username || 'User'} className="w-full h-full object-cover" />
                                                                 ) : (
-                                                                    (ava?.username || '?').substring(0, 1).toUpperCase()
+                                                                    getInitials(ava)
                                                                 )}
                                                             </div>
                                                         ))}
@@ -430,7 +471,11 @@ function MicroView({ members, stages, sets, selections, loading, currentUserId }
     festivalEnd?: string
 }) {
 
-    const timeToMinutes = (t: string) => { const [h, m] = t.split(':').map(Number); return h * 60 + m; }
+    const timeToMinutes = (t: string) => {
+        if (!t) return 0;
+        const [h, m] = t.split(':').map(Number);
+        return h * 60 + (m || 0);
+    }
 
     // -- ALGORITHM V2 --
     // 1. Sort all sets by START TIME.
@@ -537,6 +582,64 @@ function MicroView({ members, stages, sets, selections, loading, currentUserId }
         return { startTime, winners };
     }).filter(Boolean);
 
+    // -- Pre-calculate Recommendations Map --
+    // We do this in a separate pass so we can track "last recommended end time"
+    const recommendedSetIds = new Set<string>();
+    let lastRecommendedEndTime = 0; // minutes
+
+    itinerary.forEach(block => {
+        if (!block) return;
+        const { winners } = block;
+        const isSplit = winners.length > 1;
+
+        // 1. If user voted Green/Yellow for anyone in this block, recommend those specifically
+        const userPicks = winners.filter(w => {
+            const vote = selections.find(s => s.set_id === w.set.id && s.user_id === currentUserId);
+            return vote && (vote.priority === 'green' || vote.priority === 'yellow');
+        });
+
+        if (userPicks.length > 0) {
+            userPicks.forEach(p => recommendedSetIds.add(p.set.id));
+            // Update last end time (use the latest one if user picked multiple)
+            const latestEnd = Math.max(...userPicks.map(p => timeToMinutes(p.set.end_time || "") || (timeToMinutes(p.set.start_time) + 60)));
+            lastRecommendedEndTime = latestEnd;
+            return;
+        }
+
+        // 2. If user didn't vote (or voted Red), decide based on consensus + travel buffer
+        if (!isSplit) {
+            // Lone artist: Recommend it!
+            const lone = winners[0];
+            recommendedSetIds.add(lone.set.id);
+            lastRecommendedEndTime = timeToMinutes(lone.set.end_time || "") || (timeToMinutes(lone.set.start_time) + 60);
+        } else {
+            // Multiple winners: Favor the one with the best gap from previous set
+            // or highest consensus if gaps are equal.
+            const sortedByLogic = [...winners].sort((a, b) => {
+                const startA = timeToMinutes(a.set.start_time);
+                const startB = timeToMinutes(b.set.start_time);
+                const gapA = startA - lastRecommendedEndTime;
+                const gapB = startB - lastRecommendedEndTime;
+
+                // Priority 1: If one set starts AFTER the previous one ends (gap >= 0) but the other doesn't
+                if (gapA >= 0 && gapB < 0) return -1;
+                if (gapB >= 0 && gapA < 0) return 1;
+
+                // Priority 2: If both are overlaps or both are gaps, favor the one that starts LATER (more travel time)
+                if (Math.abs(gapA - gapB) > 5) { // 5 min threshold for significance
+                    return gapB - gapA; // Higher gap comes first
+                }
+
+                // Priority 3: Consensus (Score)
+                return b.score - a.score;
+            });
+
+            const bestPick = sortedByLogic[0];
+            recommendedSetIds.add(bestPick.set.id);
+            lastRecommendedEndTime = timeToMinutes(bestPick.set.end_time || "") || (timeToMinutes(bestPick.set.start_time) + 60);
+        }
+    });
+
 
     return (
         <div className="max-w-3xl mx-auto py-12 px-4 relative">
@@ -575,32 +678,13 @@ function MicroView({ members, stages, sets, selections, loading, currentUserId }
                                     });
 
                                     // Check if current user is recommended to this artist
-                                    const userVote = setVotes.find(v => v.user_id === currentUserId);
-                                    let isRecommended = false;
-
-                                    if (userVote) {
-                                        // User voted for this, so easy recommendation
-                                        isRecommended = userVote.priority === 'green' || userVote.priority === 'yellow';
-                                    } else if (!isSplit) {
-                                        // Only one option, so recommended by default
-                                        isRecommended = true;
-                                    } else {
-                                        // In a split AND user didn't vote for either
-                                        // Pick the one with highest consensus (Green votes) or total score
-                                        const otherWinner = block!.winners.find(w => w.set.id !== item.set.id);
-                                        if (otherWinner) {
-                                            if (item.greenCount > otherWinner.greenCount) {
-                                                isRecommended = true;
-                                            } else if (item.greenCount === otherWinner.greenCount && item.score >= otherWinner.score) {
-                                                isRecommended = true;
-                                            }
-                                        }
-                                    }
+                                    // Check if recommended using our pre-calculated map
+                                    const isRecommended = recommendedSetIds.has(item.set.id);
 
                                     // Priority Logic (Green wins)
                                     const isTopPick = item.greenCount > 0;
                                     const cardBg = isTopPick ? 'bg-white' : 'bg-retro-cream';
-                                    const highlightClass = isRecommended ? 'border-retro-blue border-[3px] -m-[1px] shadow-[6px_6px_0px_0px_rgba(59,130,246,1)]' : 'border-2 border-retro-dark shadow-[4px_4px_0px_0px_rgba(26,44,50,1)] md:shadow-[6px_6px_0px_0px_rgba(26,44,50,1)]';
+                                    const highlightClass = isRecommended ? 'border-retro-blue border-[3px] -m-[1px] shadow-[6px_6px_0px_0px_rgba(26,44,50,1)]' : 'border-2 border-retro-dark shadow-[4px_4px_0px_0px_rgba(26,44,50,1)] md:shadow-[6px_6px_0px_0px_rgba(26,44,50,1)]';
 
                                     return (
                                         <div key={item.set.id}
@@ -660,7 +744,7 @@ function MicroView({ members, stages, sets, selections, loading, currentUserId }
                                                             {m.avatar_url ? (
                                                                 <img src={m.avatar_url} alt={m.username || 'User'} className="w-full h-full object-cover" />
                                                             ) : (
-                                                                (m.username || '?').charAt(0).toUpperCase()
+                                                                getInitials(m)
                                                             )}
                                                         </div>
                                                     ))}

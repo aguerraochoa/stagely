@@ -6,6 +6,23 @@ import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
 import type { Festival, FestivalDay, Stage, Set } from '@/types/database.types'
 
+type Profile = {
+  id: string
+  username: string
+  display_name: string | null
+  avatar_url: string | null
+}
+
+const getInitials = (profile: Profile) => {
+  const name = profile.display_name || profile.username || '?';
+  if (!name || name === '?') return '?';
+  const parts = name.trim().split(/\s+/);
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  }
+  return name.substring(0, 2).toUpperCase();
+};
+
 export default function FestivalManagementPage() {
   const params = useParams()
   const festivalId = params.id as string
@@ -18,6 +35,8 @@ export default function FestivalManagementPage() {
   const [selectedDay, setSelectedDay] = useState<string | null>(null)
   const [stages, setStages] = useState<Record<string, Stage[]>>({})
   const [sets, setSets] = useState<Record<string, Set[]>>({})
+  const [profile, setProfile] = useState<Profile | null>(null)
+  const [user, setUser] = useState<any>(null)
 
   // CSV Import state
   const [showCSVImport, setShowCSVImport] = useState(false)
@@ -43,6 +62,19 @@ export default function FestivalManagementPage() {
   const [festivalEnd, setFestivalEnd] = useState('23:59')
 
   useEffect(() => {
+    const checkUser = async () => {
+      const { data: { user: authUser } } = await supabase.auth.getUser()
+      if (authUser) {
+        setUser(authUser)
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', authUser.id)
+          .single()
+        setProfile(profileData)
+      }
+    }
+    checkUser()
     fetchFestival()
   }, [festivalId])
 
@@ -692,19 +724,37 @@ export default function FestivalManagementPage() {
 
   return (
     <div className="min-h-screen bg-retro-cream text-retro-dark">
-      <nav className="bg-white border-b-2 border-retro-dark">
+      <nav className="bg-white border-b-2 border-retro-dark sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
-            <div className="flex items-center gap-4">
-              <Link href="/" className="text-2xl font-black uppercase italic tracking-tighter text-retro-dark">
-                Stagely
+          <div className="flex justify-between h-16 items-center flex-wrap md:flex-nowrap gap-2">
+            <div className="flex items-center gap-4 min-w-0">
+              <Link href="/">
+                <img src="/icon.png" alt="Stagely Logo" className="h-8 w-auto min-w-[32px]" />
               </Link>
-              <div className="h-6 w-0.5 bg-retro-dark"></div>
-              <Link href="/admin" className="text-retro-dark font-bold uppercase tracking-wider text-xs hover:text-retro-orange">
+              <div className="h-6 w-0.5 bg-retro-dark/20"></div>
+              <Link href="/admin" className="hidden md:block text-retro-dark font-black uppercase tracking-wider text-xs hover:text-retro-orange whitespace-nowrap">
                 Admin
               </Link>
-              <span className="text-retro-dark/50 font-bold">/</span>
+              <span className="hidden md:block text-retro-dark/30 font-bold">/</span>
               <span className="text-retro-dark font-bold uppercase tracking-wider text-xs truncate max-w-[150px] md:max-w-none">{festival.name}</span>
+            </div>
+
+            <div className="flex items-center gap-4">
+              {/* Profile Link */}
+              <Link
+                href="/profile"
+                className="w-8 h-8 rounded-full border-2 border-retro-dark bg-retro-teal flex items-center justify-center text-[10px] font-black hover:-translate-y-0.5 transition-all shadow-[2px_2px_0px_0px_rgba(26,44,50,1)]"
+                title="My Profile"
+              >
+                {profile ? getInitials(profile) : '?'}
+              </Link>
+
+              <Link
+                href="/admin"
+                className="px-4 py-2 text-sm font-black uppercase tracking-wider text-retro-dark hover:text-retro-orange transition-colors"
+              >
+                Back
+              </Link>
             </div>
           </div>
         </div>
@@ -887,7 +937,7 @@ export default function FestivalManagementPage() {
               + Add Day
             </button>
           </div>
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-3 pt-2">
             {days.map((day) => (
               editingDay === day.id ? (
                 <div key={day.id} className="bg-white p-4 rounded-xl border-2 border-retro-dark shadow-[4px_4px_0px_0px_rgba(26,44,50,1)] flex items-center gap-3">
@@ -1022,16 +1072,16 @@ export default function FestivalManagementPage() {
                         className="p-1 font-black text-retro-dark border-l-2 border-retro-dark last:border-r-0 flex flex-col items-center"
                       >
                         <button
+                          onClick={() => handleAddSet(selectedDay, stage.id)}
+                          className="mb-1 w-full py-1 text-[10px] bg-white hover:bg-retro-orange hover:text-white border border-retro-dark uppercase tracking-widest transition-all"
+                        >
+                          + Add Artist
+                        </button>
+                        <button
                           onClick={() => handleStartEditStage(stage)}
                           className="w-full p-2 hover:bg-white transition-all cursor-pointer text-center"
                         >
                           <span className="text-sm uppercase tracking-tight">{stage.name}</span>
-                        </button>
-                        <button
-                          onClick={() => handleAddSet(selectedDay, stage.id)}
-                          className="mt-1 w-full py-1 text-[10px] bg-white hover:bg-retro-orange hover:text-white border border-retro-dark uppercase tracking-widest transition-all"
-                        >
-                          + Add Artist
                         </button>
                       </div>
                     ))}

@@ -12,15 +12,43 @@ type Festival = {
   created_at: string
 }
 
+type Profile = {
+  id: string
+  username: string
+  display_name: string | null
+  avatar_url: string | null
+}
+
+const getInitials = (profile: Profile) => {
+  const name = profile.display_name || profile.username || '?';
+  if (!name || name === '?') return '?';
+  const parts = name.trim().split(/\s+/);
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  }
+  return name.substring(0, 2).toUpperCase();
+};
+
 export default function FestivalsPage() {
   const [festivals, setFestivals] = useState<Festival[]>([])
   const [loading, setLoading] = useState(true)
+  const [profile, setProfile] = useState<Profile | null>(null)
   const router = useRouter()
   const supabase = createClient()
 
   useEffect(() => {
-    const fetchFestivals = async () => {
+    const fetchData = async () => {
       try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user) {
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', user.id)
+            .single()
+          setProfile(profileData)
+        }
+
         const { data, error } = await supabase
           .from('festivals')
           .select('id, name, year, created_at')
@@ -40,7 +68,7 @@ export default function FestivalsPage() {
       }
     }
 
-    fetchFestivals()
+    fetchData()
   }, [supabase])
 
   if (loading) {
@@ -53,22 +81,33 @@ export default function FestivalsPage() {
 
   return (
     <div className="min-h-screen bg-retro-cream text-retro-dark">
-      <nav className="bg-white border-b-2 border-retro-dark">
+      <nav className="bg-white border-b-2 border-retro-dark sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
-            <div className="flex items-center gap-4">
-              <Link href="/" className="text-2xl font-black uppercase italic tracking-tighter text-retro-dark">
-                Stagely
+            <div className="flex items-center gap-4 min-w-0">
+              <Link href="/">
+                <img src="/icon.png" alt="Stagely Logo" className="h-8 w-auto min-w-[32px]" />
               </Link>
-              <div className="h-6 w-0.5 bg-retro-dark"></div>
-              <span className="text-retro-dark font-bold uppercase tracking-widest text-xs">Festivals</span>
+              <div className="h-6 w-0.5 bg-retro-dark/20"></div>
+              <span className="text-retro-dark font-black uppercase tracking-widest text-xs truncate">Festivals</span>
             </div>
-            <Link
-              href="/"
-              className="px-4 py-2 text-sm font-black uppercase tracking-wider text-retro-dark hover:text-retro-orange transition-colors"
-            >
-              Home
-            </Link>
+            <div className="flex items-center gap-4">
+              {/* Profile Link */}
+              <Link
+                href="/profile"
+                className="w-8 h-8 rounded-full border-2 border-retro-dark bg-retro-teal flex items-center justify-center text-[10px] font-black hover:-translate-y-0.5 transition-all shadow-[2px_2px_0px_0px_rgba(26,44,50,1)]"
+                title="My Profile"
+              >
+                {profile ? getInitials(profile) : '?'}
+              </Link>
+
+              <Link
+                href="/"
+                className="px-4 py-2 text-sm font-black uppercase tracking-wider text-retro-dark hover:text-retro-orange transition-colors"
+              >
+                Back
+              </Link>
+            </div>
           </div>
         </div>
       </nav>

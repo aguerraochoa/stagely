@@ -33,9 +33,22 @@ type Set = {
   end_time: string | null
 }
 
-type User = {
+type Profile = {
   id: string
+  username?: string
+  display_name?: string | null
+  avatar_url?: string | null
 }
+
+const getInitials = (profile: Profile) => {
+  const name = profile.display_name || profile.username || '?';
+  if (!name || name === '?') return '?';
+  const parts = name.trim().split(/\s+/);
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  }
+  return name.substring(0, 2).toUpperCase();
+};
 
 export default function FestivalDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params)
@@ -46,7 +59,8 @@ export default function FestivalDetailPage({ params }: { params: Promise<{ id: s
   const [sets, setSets] = useState<Set[]>([])
   const [userSelections, setUserSelections] = useState<Record<string, Priority>>({})
   const [loading, setLoading] = useState(true)
-  const [currentUser, setCurrentUser] = useState<User | null>(null)
+  const [currentUser, setCurrentUser] = useState<any>(null)
+  const [profile, setProfile] = useState<Profile | null>(null)
   const router = useRouter()
   const supabase = createClient()
 
@@ -55,7 +69,15 @@ export default function FestivalDetailPage({ params }: { params: Promise<{ id: s
       try {
         // Get current user
         const { data: { user } } = await supabase.auth.getUser()
-        setCurrentUser(user)
+        if (user) {
+          setCurrentUser(user)
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', user.id)
+            .single()
+          setProfile(profileData)
+        }
 
         // Fetch festival
         const { data: festivalData, error: festivalError } = await supabase
@@ -315,26 +337,35 @@ export default function FestivalDetailPage({ params }: { params: Promise<{ id: s
 
   return (
     <div className="min-h-screen bg-retro-cream text-retro-dark">
-      <nav className="bg-white border-b-2 border-retro-dark">
+      <nav className="bg-white border-b-2 border-retro-dark sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
-            <div className="flex items-center gap-4">
-              <Link href="/" className="text-2xl font-black uppercase italic tracking-tighter text-retro-dark">
-                Stagely
+          <div className="flex justify-between h-16 items-center flex-wrap md:flex-nowrap gap-2">
+            <div className="flex items-center gap-4 min-w-0">
+              <Link href="/">
+                <img src="/icon.png" alt="Stagely Logo" className="h-8 w-auto min-w-[32px]" />
               </Link>
-              <div className="h-6 w-0.5 bg-retro-dark"></div>
-              <Link href="/festivals" className="text-retro-dark font-black uppercase tracking-wider text-xs hover:text-retro-orange">
-                Festivals
-              </Link>
-              <span className="text-retro-dark/50 font-bold">/</span>
-              <span className="text-retro-dark font-bold uppercase tracking-wider text-xs">{festival.name} {festival.year}</span>
+              <div className="h-6 w-0.5 bg-retro-dark/20"></div>
+              <span className="text-retro-dark font-black uppercase tracking-widest text-xs truncate">
+                {festival?.name}
+              </span>
             </div>
-            <Link
-              href="/festivals"
-              className="px-4 py-2 text-sm font-black uppercase tracking-wider text-retro-dark hover:text-retro-orange transition-colors"
-            >
-              Back
-            </Link>
+            <div className="flex items-center gap-4">
+              {/* Profile Link */}
+              <Link
+                href="/profile"
+                className="w-8 h-8 rounded-full border-2 border-retro-dark bg-retro-teal flex items-center justify-center text-[10px] font-black hover:-translate-y-0.5 transition-all shadow-[2px_2px_0px_0px_rgba(26,44,50,1)]"
+                title="My Profile"
+              >
+                {(profile || currentUser) ? getInitials(profile || { username: currentUser?.email } as Profile) : '?'}
+              </Link>
+
+              <Link
+                href="/festivals"
+                className="px-4 py-2 text-sm font-black uppercase tracking-wider text-retro-dark hover:text-retro-orange transition-colors"
+              >
+                Back
+              </Link>
+            </div>
           </div>
         </div>
       </nav>
@@ -351,7 +382,7 @@ export default function FestivalDetailPage({ params }: { params: Promise<{ id: s
 
         {/* Days Tabs */}
         {days.length > 0 && (
-          <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
+          <div className="flex gap-2 mb-6 overflow-x-auto pt-2 pb-2">
             {days.map((day) => (
               <button
                 key={day.id}

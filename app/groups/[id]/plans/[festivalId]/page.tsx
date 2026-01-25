@@ -733,27 +733,29 @@ function MicroView({ members, stages, sets, selections, loading, currentUserId }
                                                     {formatTime(item.set.start_time)} - {formatTime(item.set.end_time || '')}
                                                 </div>
 
-                                                {/* Avatar Pile */}
-                                                <div className="flex -space-x-1 md:-space-x-2">
-                                                    {interestedMembers.slice(0, 4).map((m, i) => (
-                                                        <div key={i} className={`w-6 h-6 md:w-8 md:h-8 rounded-full border-2 border-retro-dark flex items-center justify-center text-[8px] md:text-[10px] font-black text-white shadow-sm overflow-hidden
-                                                            ${setVotes.find(v => v.user_id === m.id)?.priority === 'green' ? 'bg-retro-teal text-retro-dark' : 'bg-retro-orange'}
-                                                            `}
-                                                            title={m.username || 'Member'}
-                                                        >
-                                                            {m.avatar_url ? (
-                                                                <img src={m.avatar_url} alt={m.username || 'User'} className="w-full h-full object-cover" />
-                                                            ) : (
-                                                                getInitials(m)
-                                                            )}
-                                                        </div>
-                                                    ))}
-                                                    {interestedMembers.length > 4 && (
-                                                        <div className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-white border-2 border-retro-dark flex items-center justify-center text-[8px] md:text-[10px] font-black text-retro-dark">
-                                                            +{interestedMembers.length - 4}
-                                                        </div>
-                                                    )}
-                                                </div>
+                                                {/* Avatar Pile - Only show on split paths */}
+                                                {isSplit && (
+                                                    <div className="flex -space-x-1 md:-space-x-2">
+                                                        {interestedMembers.slice(0, 4).map((m, i) => (
+                                                            <div key={i} className={`w-6 h-6 md:w-8 md:h-8 rounded-full border-2 border-retro-dark flex items-center justify-center text-[8px] md:text-[10px] font-black text-white shadow-sm overflow-hidden
+                                                                ${setVotes.find(v => v.user_id === m.id)?.priority === 'green' ? 'bg-retro-teal text-retro-dark' : 'bg-retro-orange'}
+                                                                `}
+                                                                title={m.username || 'Member'}
+                                                            >
+                                                                {m.avatar_url ? (
+                                                                    <img src={m.avatar_url} alt={m.username || 'User'} className="w-full h-full object-cover" />
+                                                                ) : (
+                                                                    getInitials(m)
+                                                                )}
+                                                            </div>
+                                                        ))}
+                                                        {interestedMembers.length > 4 && (
+                                                            <div className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-white border-2 border-retro-dark flex items-center justify-center text-[8px] md:text-[10px] font-black text-retro-dark">
+                                                                +{interestedMembers.length - 4}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
                                     )

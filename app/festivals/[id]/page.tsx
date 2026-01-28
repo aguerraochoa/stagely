@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import type { Priority } from '@/types/database.types'
+import { RetroBouncingDots } from '@/app/components/RetroBouncingDots'
 
 type Festival = {
   id: string
@@ -313,11 +314,11 @@ export default function FestivalDetailPage({ params }: { params: Promise<{ id: s
   const getPriorityStyles = (priority?: Priority) => {
     switch (priority) {
       case 'green':
-        return 'bg-retro-teal text-retro-dark border-retro-dark shadow-[2px_2px_0px_0px_rgba(26,44,50,1)]'
+        return 'bg-green-500 text-white border-retro-dark shadow-[2px_2px_0px_0px_rgba(26,44,50,1)]'
       case 'yellow':
-        return 'bg-retro-cream text-retro-dark border-retro-dark shadow-[2px_2px_0px_0px_rgba(26,44,50,1)]'
+        return 'bg-yellow-300 text-retro-dark border-retro-dark shadow-[2px_2px_0px_0px_rgba(26,44,50,1)]'
       case 'red':
-        return 'bg-retro-orange text-white border-retro-dark shadow-[2px_2px_0px_0px_rgba(26,44,50,1)]'
+        return 'bg-red-500 text-white border-retro-dark shadow-[2px_2px_0px_0px_rgba(26,44,50,1)]'
       default:
         return 'bg-white text-retro-dark border-retro-dark hover:bg-slate-50'
     }
@@ -326,7 +327,7 @@ export default function FestivalDetailPage({ params }: { params: Promise<{ id: s
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-retro-orange"></div>
+        <RetroBouncingDots />
       </div>
     )
   }
@@ -376,7 +377,7 @@ export default function FestivalDetailPage({ params }: { params: Promise<{ id: s
             {festival.name} {festival.year}
           </h1>
           <p className="text-retro-dark font-bold opacity-70">
-            Tap artists to plan: <span className="inline-block px-1 bg-retro-orange text-white text-xs font-black border border-retro-dark">cool</span> → <span className="inline-block px-1 bg-retro-cream text-retro-dark text-xs font-black border border-retro-dark">interested</span> → <span className="inline-block px-1 bg-retro-teal text-retro-dark text-xs font-black border border-retro-dark">must go</span>
+            Tap artists to plan: <span className="inline-block px-1 bg-red-500 text-white text-xs font-black border border-retro-dark">low</span> → <span className="inline-block px-1 bg-yellow-300 text-retro-dark text-xs font-black border border-retro-dark">interested</span> → <span className="inline-block px-1 bg-green-500 text-white text-xs font-black border border-retro-dark">MUST</span> <span className="text-retro-dark/60 font-black text-xs uppercase tracking-wider">(tap again to clear)</span>
           </p>
         </div>
 
@@ -476,37 +477,36 @@ export default function FestivalDetailPage({ params }: { params: Promise<{ id: s
                                 {setsStartingHere.map((set) => {
                                   const pos = getSetPosition(set)
                                   const heightPx = pos.heightSlots * 24 // 24px per 15-min slot
-                                  const isShort = heightPx < 60
-                                  const isVeryShort = heightPx < 40
                                   const priority = userSelections[set.id]
+                                  // Calculate height slots similar to group planner
+                                  const heightSlots = Math.ceil(heightPx / 24)
+                                  const isVeryShort = heightSlots <= 1
+                                  const isShort = heightSlots <= 2
 
                                   return (
                                     <button
                                       key={set.id}
                                       onClick={() => togglePriority(set)}
-                                      className={`absolute left-1 right-1 top-0.5 rounded-none border-2 z-10 hover:z-20 hover:scale-[1.02] transition-all overflow-hidden p-1 flex flex-col justify-center items-center ${getPriorityStyles(priority)}`}
+                                      className={`absolute left-1 right-1 top-0.5 rounded-none border-2 z-10 hover:z-20 hover:scale-[1.02] transition-all overflow-hidden p-2 cursor-pointer ${getPriorityStyles(priority)}`}
                                       style={{
-                                        height: `${heightPx}px`,
-                                        minHeight: '32px'
+                                        height: `${Math.max(32, heightPx)}px`
                                       }}
+                                      title={`Tap to cycle: ${priority ? (priority === 'red' ? 'low' : priority === 'yellow' ? 'interested' : 'MUST') : 'none'} → ${priority === 'red' ? 'interested' : priority === 'yellow' ? 'MUST' : priority === 'green' ? 'clear' : 'low'}`}
                                     >
                                       <div
-                                        className="font-black uppercase leading-tight w-full text-center"
+                                        className={`font-black uppercase leading-tight w-full ${priority === 'green' || priority === 'red' ? 'text-white' : 'text-retro-dark'}`}
                                         style={{
                                           fontSize: isVeryShort ? '8px' : isShort ? '10px' : '12px',
-                                          overflow: 'hidden',
                                           display: '-webkit-box',
-                                          WebkitLineClamp: 2,
-                                          WebkitBoxOrient: 'vertical'
+                                          WebkitLineClamp: heightSlots <= 1 ? 1 : heightSlots <= 2 ? 2 : 3,
+                                          WebkitBoxOrient: 'vertical',
+                                          overflow: 'hidden',
+                                          wordBreak: 'break-word',
+                                          overflowWrap: 'break-word'
                                         }}
                                       >
                                         {set.artist_name}
                                       </div>
-                                      {!isVeryShort && (
-                                        <div className="text-[10px] font-bold opacity-80 mt-0.5">
-                                          {formatTime(set.start_time)}
-                                        </div>
-                                      )}
                                     </button>
                                   )
                                 })}

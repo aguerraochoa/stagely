@@ -6,7 +6,8 @@ import { useRouter } from 'next/navigation'
 
 export default function LoginPage() {
   const [mode, setMode] = useState<'signin' | 'signup'>('signin')
-  const [loading, setLoading] = useState(false)
+  const [emailLoading, setEmailLoading] = useState(false)
+  const [googleLoading, setGoogleLoading] = useState(false)
   const [message, setMessage] = useState('')
   const [email, setEmail] = useState('')
   const [username, setUsername] = useState('')
@@ -116,21 +117,21 @@ export default function LoginPage() {
 
   const handleEmailSignup = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true)
+    setEmailLoading(true)
     setMessage('')
 
     // Validate username
     const usernameError = validateUsername(username)
     if (usernameError) {
       setMessage(usernameError)
-      setLoading(false)
+      setEmailLoading(false)
       return
     }
 
     // Validate passwords match
     if (password !== confirmPassword) {
       setMessage('Passwords do not match')
-      setLoading(false)
+      setEmailLoading(false)
       return
     }
 
@@ -138,7 +139,7 @@ export default function LoginPage() {
     const passwordError = validatePassword(password)
     if (passwordError) {
       setMessage(passwordError)
-      setLoading(false)
+      setEmailLoading(false)
       return
     }
 
@@ -162,7 +163,7 @@ export default function LoginPage() {
 
     if (error) {
       setMessage(error.message)
-      setLoading(false)
+      setEmailLoading(false)
     } else if (data.user) {
       setMessage('Check your email to verify your account before signing in.')
       // Clear form
@@ -171,13 +172,13 @@ export default function LoginPage() {
       setDisplayName('')
       setPassword('')
       setConfirmPassword('')
-      setLoading(false)
+      setEmailLoading(false)
     }
   }
 
   const handleEmailSignin = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true)
+    setEmailLoading(true)
     setMessage('')
 
     let signInEmail = email.trim().toLowerCase()
@@ -192,7 +193,7 @@ export default function LoginPage() {
 
       if (profileError || !profile?.email) {
         setMessage('Username not found. Please check your spelling or use your email.')
-        setLoading(false)
+        setEmailLoading(false)
         return
       }
       signInEmail = profile.email
@@ -206,13 +207,13 @@ export default function LoginPage() {
 
     if (error) {
       setMessage(error.message)
-      setLoading(false)
+      setEmailLoading(false)
     } else if (data.user) {
       // Check if email is verified
       if (!data.user.email_confirmed_at) {
         setMessage('Please verify your email before signing in. Check your inbox for the verification link.')
         await supabase.auth.signOut()
-        setLoading(false)
+        setEmailLoading(false)
       } else {
         // Success - redirect to intended destination or home
         const urlParams = new URLSearchParams(window.location.search)
@@ -224,7 +225,7 @@ export default function LoginPage() {
   }
 
   const handleGoogleLogin = async () => {
-    setLoading(true)
+    setGoogleLoading(true)
     setMessage('')
 
     // Preserve the next parameter for OAuth redirect
@@ -242,7 +243,7 @@ export default function LoginPage() {
 
     if (error) {
       setMessage(error.message)
-      setLoading(false)
+      setGoogleLoading(false)
     }
     // Note: If successful, user will be redirected to Google, so we don't need to handle success here
   }
@@ -341,7 +342,7 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                disabled={loading}
+                disabled={emailLoading}
                 className="w-full px-4 py-3 border-2 border-retro-dark rounded-lg bg-white text-retro-dark font-bold focus:shadow-[4px_4px_0px_0px_rgba(26,44,50,1)] focus:-translate-y-0.5 outline-none transition-all placeholder-retro-dark/30 disabled:opacity-50"
                 placeholder={mode === 'signup' ? 'you@example.com' : 'username or email'}
               />
@@ -359,7 +360,7 @@ export default function LoginPage() {
                     value={username}
                     onChange={(e) => setUsername(e.target.value.toLowerCase())}
                     required
-                    disabled={loading}
+                    disabled={emailLoading}
                     minLength={3}
                     maxLength={20}
                     pattern="[a-zA-Z0-9_-]+"
@@ -379,7 +380,7 @@ export default function LoginPage() {
                     type="text"
                     value={displayName}
                     onChange={(e) => setDisplayName(e.target.value)}
-                    disabled={loading}
+                    disabled={emailLoading}
                     className="w-full px-4 py-3 border-2 border-retro-dark rounded-lg bg-white text-retro-dark font-bold focus:shadow-[4px_4px_0px_0px_rgba(26,44,50,1)] focus:-translate-y-0.5 outline-none transition-all placeholder-retro-dark/30 disabled:opacity-50"
                     placeholder="Your Name"
                   />
@@ -397,7 +398,7 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                disabled={loading}
+                disabled={emailLoading}
                 minLength={8}
                 className="w-full px-4 py-3 border-2 border-retro-dark rounded-lg bg-white text-retro-dark font-bold focus:shadow-[4px_4px_0px_0px_rgba(26,44,50,1)] focus:-translate-y-0.5 outline-none transition-all placeholder-retro-dark/30 disabled:opacity-50"
                 placeholder={mode === 'signup' ? 'At least 8 characters' : 'Enter your password'}
@@ -434,7 +435,7 @@ export default function LoginPage() {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
-                  disabled={loading}
+                  disabled={emailLoading}
                   minLength={8}
                   className="w-full px-4 py-3 border-2 border-retro-dark rounded-lg bg-white text-retro-dark font-bold focus:shadow-[4px_4px_0px_0px_rgba(26,44,50,1)] focus:-translate-y-0.5 outline-none transition-all placeholder-retro-dark/30 disabled:opacity-50"
                   placeholder="Confirm your password"
@@ -444,10 +445,10 @@ export default function LoginPage() {
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={emailLoading}
               className="w-full py-4 px-4 bg-retro-orange hover:bg-retro-dark text-white border-2 border-retro-dark font-black uppercase tracking-wider rounded-lg shadow-[4px_4px_0px_0px_rgba(26,44,50,1)] hover:shadow-[6px_6px_0px_0px_rgba(26,44,50,1)] hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? (
+              {emailLoading ? (
                 <span className="flex items-center justify-center gap-2">
                   <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -474,10 +475,10 @@ export default function LoginPage() {
           {/* Google OAuth Button */}
           <button
             onClick={handleGoogleLogin}
-            disabled={loading}
+            disabled={googleLoading}
             className="w-full flex items-center justify-center gap-3 py-3 px-4 border-2 border-retro-dark rounded-xl font-bold bg-white text-retro-dark shadow-[4px_4px_0px_0px_rgba(26,44,50,1)] hover:shadow-[6px_6px_0px_0px_rgba(26,44,50,1)] hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
-            {loading ? (
+            {googleLoading ? (
               <>
                 <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { RetroBouncingDots } from '@/app/components/RetroBouncingDots'
 
 type Group = {
     id: string
@@ -96,7 +97,7 @@ export default function GroupsPage() {
     if (loading) {
         return (
             <div className="flex min-h-screen items-center justify-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-retro-orange"></div>
+                <RetroBouncingDots />
             </div>
         )
     }

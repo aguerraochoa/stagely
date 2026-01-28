@@ -1,8 +1,8 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { updateSession } from '@/lib/supabase/middleware'
 
-export async function middleware(request: NextRequest) {
-  // Skip middleware for static files, API routes, and Next.js internals
+export async function proxy(request: NextRequest) {
+  // Skip proxy for static files, API routes, and Next.js internals
   const pathname = request.nextUrl.pathname
   if (
     pathname.startsWith('/_next') ||
@@ -21,7 +21,7 @@ export async function middleware(request: NextRequest) {
   try {
     return await updateSession(request)
   } catch (error) {
-    console.error('Middleware error:', error)
+    console.error('Proxy error:', error)
     // On error, allow the request to continue
     return NextResponse.next()
   }
@@ -39,4 +39,3 @@ export const config = {
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }
-

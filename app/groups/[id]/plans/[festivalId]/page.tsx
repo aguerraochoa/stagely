@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import type { Priority } from '@/types/database.types'
+import { RetroBouncingDots } from '@/app/components/RetroBouncingDots'
 
 // -- Types --
 type Festival = {
@@ -71,6 +72,7 @@ export default function GroupPlannerPage({ params }: { params: Promise<{ id: str
     const [stages, setStages] = useState<Stage[]>([])
     const [sets, setSets] = useState<Set[]>([])
     const [groupSelections, setGroupSelections] = useState<GroupSelection[]>([])
+    const [userSelections, setUserSelections] = useState<Record<string, Priority>>({})
     const [currentUserId, setCurrentUserId] = useState<string | null>(null)
 
     const router = useRouter()
@@ -167,6 +169,23 @@ export default function GroupPlannerPage({ params }: { params: Promise<{ id: str
                         .in('set_id', setIds)
 
                     setGroupSelections(selectionsData || [])
+
+                    // Also fetch current user's selections for inline editing
+                    if (currentUserId) {
+                        const { data: userSelectionsData } = await supabase
+                            .from('user_selections')
+                            .select('set_id, priority')
+                            .eq('user_id', currentUserId)
+                            .in('set_id', setIds)
+
+                        if (userSelectionsData) {
+                            const selectionsMap: Record<string, Priority> = {}
+                            userSelectionsData.forEach(sel => {
+                                selectionsMap[sel.set_id] = sel.priority
+                            })
+                            setUserSelections(prev => ({ ...prev, ...selectionsMap }))
+                        }
+                    }
                 }
 
             } catch (err) {
@@ -180,12 +199,99 @@ export default function GroupPlannerPage({ params }: { params: Promise<{ id: str
         if (members.length > 0) {
             fetchDayData()
         }
-    }, [selectedDay, members, supabase])
+    }, [selectedDay, members, currentUserId, supabase])
+
+    // Toggle priority logic: blank -> red -> yellow -> green -> blank
+    const togglePriority = async (set: Set) => {
+        if (!currentUserId) {
+            router.push('/login')
+            return
+        }
+
+        const currentPriority = userSelections[set.id]
+        let nextPriority: Priority | null = null
+
+        if (!currentPriority) nextPriority = 'red'
+        else if (currentPriority === 'red') nextPriority = 'yellow'
+        else if (currentPriority === 'yellow') nextPriority = 'green'
+        else nextPriority = null // Toggle off
+
+        // Optimistic update
+        setUserSelections(prev => {
+            const next = { ...prev }
+            if (nextPriority) {
+                next[set.id] = nextPriority
+            } else {
+                delete next[set.id]
+            }
+            return next
+        })
+
+        // Persist to DB
+        try {
+            if (nextPriority) {
+                const { error } = await supabase
+                    .from('user_selections')
+                    .upsert({
+                        user_id: currentUserId,
+                        set_id: set.id,
+                        priority: nextPriority
+                    }, { onConflict: 'user_id, set_id' })
+
+                if (error) throw error
+            } else {
+                const { error } = await supabase
+                    .from('user_selections')
+                    .delete()
+                    .match({ user_id: currentUserId, set_id: set.id })
+
+                if (error) throw error
+            }
+
+            // Refresh group selections to update the UI
+            const setIds = sets.map(s => s.id)
+            const memberIds = members.map(m => m.id)
+            if (memberIds.length > 0 && setIds.length > 0) {
+                const { data: selectionsData } = await supabase
+                    .from('user_selections')
+                    .select('user_id, set_id, priority')
+                    .in('user_id', memberIds)
+                    .in('set_id', setIds)
+
+                setGroupSelections(selectionsData || [])
+            }
+        } catch (err) {
+            console.error('Error saving selection:', err)
+            // Revert optimistic update
+            setUserSelections(prev => {
+                const next = { ...prev }
+                if (currentPriority) {
+                    next[set.id] = currentPriority
+                } else {
+                    delete next[set.id]
+                }
+                return next
+            })
+        }
+    }
+
+    const getPriorityStyles = (priority?: Priority) => {
+        switch (priority) {
+            case 'green':
+                return 'bg-green-500 text-white border-retro-dark shadow-[2px_2px_0px_0px_rgba(26,44,50,1)]'
+            case 'yellow':
+                return 'bg-yellow-300 text-retro-dark border-retro-dark shadow-[2px_2px_0px_0px_rgba(26,44,50,1)]'
+            case 'red':
+                return 'bg-red-500 text-white border-retro-dark shadow-[2px_2px_0px_0px_rgba(26,44,50,1)]'
+            default:
+                return 'bg-white text-retro-dark border-retro-dark hover:bg-retro-cream'
+        }
+    }
 
     // -- Render Helpers --
     if (loading) return (
         <div className="flex h-[400px] items-center justify-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-retro-orange"></div>
+            <RetroBouncingDots />
         </div>
     )
     if (!festival) return <div className="p-12 text-center">Festival not found</div>
@@ -208,16 +314,6 @@ export default function GroupPlannerPage({ params }: { params: Promise<{ id: str
 
                         {/* Right side: Actions, Toggles, Back */}
                         <div className="flex items-center gap-2 md:gap-4">
-                            {/* Desktop Edit Link */}
-                            <Link
-                                href={`/festivals/${festival.id}`}
-                                className="hidden lg:flex px-3 py-1.5 text-xs font-bold text-retro-orange hover:text-retro-dark items-center gap-1"
-                            >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                </svg>
-                                Edit
-                            </Link>
 
                             {/* View Toggles */}
                             <div className="flex border-2 border-retro-dark rounded-lg overflow-hidden bg-white shadow-[2px_2px_0px_0px_rgba(26,44,50,1)]">
@@ -280,14 +376,24 @@ export default function GroupPlannerPage({ params }: { params: Promise<{ id: str
                 {/* Content Area */}
                 <div className="bg-white rounded-xl border-4 border-retro-dark shadow-[8px_8px_0px_0px_rgba(26,44,50,1)] overflow-hidden min-h-[600px]">
                     {activeTab === 'macro' ? (
-                        <MacroView
-                            members={members}
-                            stages={stages}
-                            sets={sets}
-                            selections={groupSelections}
-                            festivalStart={(festival as any)?.start_time}
-                            festivalEnd={(festival as any)?.end_time}
-                        />
+                        dayLoading ? (
+                            <div className="flex min-h-[900px] items-center justify-center">
+                                <RetroBouncingDots />
+                            </div>
+                        ) : (
+                            <MacroView
+                                members={members}
+                                stages={stages}
+                                sets={sets}
+                                selections={groupSelections}
+                                userSelections={userSelections}
+                                onTogglePriority={togglePriority}
+                                getPriorityStyles={getPriorityStyles}
+                                currentUserId={currentUserId}
+                                festivalStart={(festival as any)?.start_time}
+                                festivalEnd={(festival as any)?.end_time}
+                            />
+                        )
                     ) : (
                         <MicroView
                             members={members}
@@ -310,18 +416,22 @@ export default function GroupPlannerPage({ params }: { params: Promise<{ id: str
 // Sub-Components (Ideally in separate files)
 // ------------------------------------------
 
-function MacroView({ members, stages, sets, selections, festivalStart, festivalEnd }: {
+function MacroView({ members, stages, sets, selections, userSelections, onTogglePriority, getPriorityStyles, currentUserId, festivalStart, festivalEnd }: {
     members: Profile[],
     stages: Stage[],
     sets: Set[],
     selections: GroupSelection[],
+    userSelections: Record<string, Priority>,
+    onTogglePriority: (set: Set) => void,
+    getPriorityStyles: (priority?: Priority) => string,
+    currentUserId: string | null,
     festivalStart?: string,
     festivalEnd?: string
 }) {
-    // Helper to get all avatars for a specific set
+    // Helper to get all avatars for a specific set (excluding current user)
     const getSetAvatars = (setId: string) => {
         return selections
-            .filter(s => s.set_id === setId)
+            .filter(s => s.set_id === setId && s.user_id !== currentUserId) // Exclude current user
             .map(s => {
                 const member = members.find(m => m.id === s.user_id)
                 if (!member) return null;
@@ -376,12 +486,6 @@ function MacroView({ members, stages, sets, selections, festivalStart, festivalE
         const heightSlots = Math.max(1, Math.ceil((adjustedEndMin - adjustedStartMin) / 15))
         return { startSlot, heightSlots }
     }
-    const getPriorityColor = (p: Priority) => {
-        if (p === 'green') return 'bg-retro-teal text-retro-dark border-retro-dark'
-        if (p === 'yellow') return 'bg-retro-cream text-retro-dark border-retro-dark'
-        if (p === 'red') return 'bg-retro-orange text-white border-retro-dark'
-        return 'bg-white text-retro-dark border-retro-dark'
-    }
 
 
 
@@ -417,13 +521,17 @@ function MacroView({ members, stages, sets, selections, festivalStart, festivalE
                                         {setsHere.map(set => {
                                             const pos = getPosition(set)
                                             const avatars = getSetAvatars(set.id)
+                                            const userPriority = userSelections[set.id]
+                                            const priorityStyles = getPriorityStyles(userPriority)
 
                                             return (
                                                 <div key={set.id}
-                                                    className="absolute left-1 right-1 top-0.5 rounded-none border-2 border-retro-dark bg-white shadow-[2px_2px_0px_0px_rgba(26,44,50,1)] p-2 z-10 hover:z-20 hover:scale-[1.02] transition-all overflow-hidden"
-                                                    style={{ height: `${Math.max(32, pos.heightSlots * 24)}px` }}>
+                                                    onClick={() => onTogglePriority(set)}
+                                                    className={`absolute left-1 right-1 top-0.5 rounded-none border-2 border-retro-dark shadow-[2px_2px_0px_0px_rgba(26,44,50,1)] p-2 z-10 hover:z-20 hover:scale-[1.02] transition-all overflow-hidden cursor-pointer ${priorityStyles}`}
+                                                    style={{ height: `${Math.max(32, pos.heightSlots * 24)}px` }}
+                                                    title={`Tap to cycle: ${userPriority ? (userPriority === 'red' ? 'low' : userPriority === 'yellow' ? 'interested' : 'MUST') : 'none'} → ${userPriority === 'red' ? 'interested' : userPriority === 'yellow' ? 'MUST' : userPriority === 'green' ? 'clear' : 'low'}`}>
                                                     <div
-                                                        className="font-black text-retro-dark uppercase leading-tight truncate w-full"
+                                                        className={`font-black uppercase leading-tight truncate w-full ${userPriority === 'green' || userPriority === 'red' ? 'text-white' : 'text-retro-dark'}`}
                                                         style={{
                                                             fontSize: pos.heightSlots <= 1 ? '8px' : pos.heightSlots <= 2 ? '10px' : '12px'
                                                         }}
@@ -433,18 +541,22 @@ function MacroView({ members, stages, sets, selections, festivalStart, festivalE
 
                                                     {/* Avatars Overlay */}
                                                     <div className="flex -space-x-1 mt-1 overflow-hidden py-1">
-                                                        {avatars.map((ava, i) => (
-                                                            <div key={i}
-                                                                className={`w-5 h-5 rounded-full border-2 border-retro-dark flex items-center justify-center text-[8px] font-black z-10 relative overflow-hidden ${getPriorityColor(ava.priority)}`}
-                                                                title={ava?.username || 'Member'}
-                                                            >
-                                                                {ava?.avatar_url ? (
-                                                                    <img src={ava.avatar_url} alt={ava.username || 'User'} className="w-full h-full object-cover" />
-                                                                ) : (
-                                                                    getInitials(ava)
-                                                                )}
-                                                            </div>
-                                                        ))}
+                                                        {avatars.map((ava, i) => {
+                                                            const avaPriority = ava.priority
+                                                            const avaStyles = avaPriority === 'green' ? 'bg-green-500 text-white' : avaPriority === 'yellow' ? 'bg-yellow-300 text-retro-dark' : 'bg-red-500 text-white'
+                                                            return (
+                                                                <div key={i}
+                                                                    className={`w-5 h-5 rounded-full border-2 border-retro-dark flex items-center justify-center text-[8px] font-black z-10 relative overflow-hidden ${avaStyles}`}
+                                                                    title={ava?.username || 'Member'}
+                                                                >
+                                                                    {ava?.avatar_url ? (
+                                                                        <img src={ava.avatar_url} alt={ava.username || 'User'} className="w-full h-full object-cover" />
+                                                                    ) : (
+                                                                        getInitials(ava)
+                                                                    )}
+                                                                </div>
+                                                            )
+                                                        })}
                                                     </div>
                                                 </div>
                                             )
@@ -709,8 +821,8 @@ function MicroView({ members, stages, sets, selections, loading, currentUserId }
                                                 </div>
                                                 <div className="flex gap-1">
                                                     {item.greenCount > 0 && (
-                                                        <span className="bg-retro-teal text-retro-dark text-[9px] font-bold px-1.5 py-0.5 border border-retro-dark shadow-[1px_1px_0px_0px_rgba(26,44,50,1)]">
-                                                            TOP PICK
+                                                        <span className="bg-green-500 text-white text-[9px] font-bold px-1.5 py-0.5 border border-retro-dark shadow-[1px_1px_0px_0px_rgba(26,44,50,1)]">
+                                                            MUST
                                                         </span>
                                                     )}
                                                 </div>
@@ -738,8 +850,13 @@ function MicroView({ members, stages, sets, selections, loading, currentUserId }
                                                 {isSplit && (
                                                     <div className="flex -space-x-1 md:-space-x-2">
                                                         {interestedMembers.slice(0, 4).map((m, i) => (
-                                                            <div key={i} className={`w-6 h-6 md:w-8 md:h-8 rounded-full border-2 border-retro-dark flex items-center justify-center text-[8px] md:text-[10px] font-black text-white shadow-sm overflow-hidden
-                                                                ${setVotes.find(v => v.user_id === m.id)?.priority === 'green' ? 'bg-retro-teal text-retro-dark' : 'bg-retro-orange'}
+                                                            <div key={i} className={`w-6 h-6 md:w-8 md:h-8 rounded-full border-2 border-retro-dark flex items-center justify-center text-[8px] md:text-[10px] font-black shadow-sm overflow-hidden
+                                                                ${(() => {
+                                                                    const p = setVotes.find(v => v.user_id === m.id)?.priority;
+                                                                    if (p === 'green') return 'bg-green-500 text-white';
+                                                                    if (p === 'yellow') return 'bg-yellow-300 text-retro-dark';
+                                                                    return 'bg-red-500 text-white';
+                                                                })()}
                                                                 `}
                                                                 title={m.username || 'Member'}
                                                             >

@@ -262,13 +262,13 @@ export default function Home() {
           {/* little sticker row */}
           <div className="flex flex-wrap justify-center gap-3">
             <span className="inline-block bg-white border-2 border-retro-dark px-3 py-1 text-xs font-black uppercase tracking-wider shadow-[2px_2px_0px_0px_rgba(26,44,50,1)] -rotate-2">
-              Squad Mode
+              SQUAD_SYNC
             </span>
             <span className="inline-block bg-retro-teal border-2 border-retro-dark px-3 py-1 text-xs font-black uppercase tracking-wider shadow-[2px_2px_0px_0px_rgba(26,44,50,1)] rotate-1">
-              Priorities
+              STAGE_HOPPING
             </span>
             <span className="inline-block bg-retro-orange border-2 border-retro-dark px-3 py-1 text-xs font-black uppercase tracking-wider text-white shadow-[2px_2px_0px_0px_rgba(26,44,50,1)] rotate-2">
-              No Missed Sets
+              PLAN_NOT_PANIC
             </span>
           </div>
         </div>

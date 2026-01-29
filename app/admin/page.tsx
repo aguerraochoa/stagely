@@ -29,6 +29,7 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true)
   const [user, setUser] = useState<any>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
   const router = useRouter()
   const supabase = createClient()
 
@@ -67,6 +68,31 @@ export default function AdminPage() {
 
     fetchData()
   }, [router, supabase])
+
+  const handleDeleteFestival = async (festival: Festival) => {
+    if (deletingId) return
+    const ok = confirm(
+      `Delete "${festival.name} ${festival.year}"?\n\nThis will remove the festival and its schedule.`
+    )
+    if (!ok) return
+
+    setDeletingId(festival.id)
+    try {
+      const res = await fetch(`/api/admin/festivals/${festival.id}`, {
+        method: 'DELETE',
+      })
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}))
+        throw new Error(body?.error || 'Failed to delete festival')
+      }
+
+      setFestivals((prev) => prev.filter((f) => f.id !== festival.id))
+    } catch (e: any) {
+      alert(e?.message || 'Failed to delete festival')
+    } finally {
+      setDeletingId(null)
+    }
+  }
 
   if (loading) {
     return (
@@ -141,18 +167,39 @@ export default function AdminPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {festivals.map((festival) => (
-              <Link
+              <div
                 key={festival.id}
-                href={`/admin/festivals/${festival.id}`}
-                className="p-6 bg-white rounded-xl border-2 border-retro-dark shadow-[4px_4px_0px_0px_rgba(26,44,50,1)] hover:shadow-[6px_6px_0px_0px_rgba(26,44,50,1)] hover:-translate-y-1 transition-all"
+                className="relative p-6 bg-white rounded-xl border-2 border-retro-dark shadow-[4px_4px_0px_0px_rgba(26,44,50,1)] hover:shadow-[6px_6px_0px_0px_rgba(26,44,50,1)] hover:-translate-y-1 transition-all"
               >
-                <h3 className="text-xl font-black text-retro-dark mb-2 uppercase italic tracking-tight">
-                  {festival.name}
-                </h3>
-                <p className="text-retro-dark font-bold opacity-70">
-                  {festival.year}
-                </p>
-              </Link>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    handleDeleteFestival(festival)
+                  }}
+                  disabled={deletingId === festival.id}
+                  className="absolute top-3 right-3 p-2 border-2 border-retro-dark bg-white hover:bg-red-500 hover:text-white transition-colors shadow-[2px_2px_0px_0px_rgba(26,44,50,1)] disabled:opacity-50"
+                  title="Delete festival"
+                >
+                  {deletingId === festival.id ? (
+                    <span className="w-4 h-4 border-2 border-retro-dark border-t-transparent rounded-full animate-spin block" />
+                  ) : (
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  )}
+                </button>
+
+                <Link href={`/admin/festivals/${festival.id}`} className="block">
+                  <h3 className="text-xl font-black text-retro-dark mb-2 uppercase italic tracking-tight">
+                    {festival.name}
+                  </h3>
+                  <p className="text-retro-dark font-bold opacity-70">
+                    {festival.year}
+                  </p>
+                </Link>
+              </div>
             ))}
           </div>
         )}
